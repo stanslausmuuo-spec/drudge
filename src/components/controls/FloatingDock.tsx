@@ -1,102 +1,159 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Mic, MicOff, Send, VolumeX, Settings, Trash2 } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Mic,
+  MicOff,
+  Send,
+  Settings,
+  Trash2,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { AgentStatus, ConnectionState } from "@/types";
 
 interface DockProps {
   onSend: (text: string) => void;
-  onToggleListen: () => void;
-  listening: boolean;
-  speaking: boolean;
-  onStopSpeech: () => void;
+  onToggleMic: () => void;
+  onConnect: () => void;
+  onDisconnect: () => void;
   onOpenSettings: () => void;
   onClearHistory: () => void;
+  agentStatus: AgentStatus;
+  connectionState: ConnectionState;
+  micEnabled: boolean;
 }
 
 export default function FloatingDock({
   onSend,
-  onToggleListen,
-  listening,
-  speaking,
-  onStopSpeech,
+  onToggleMic,
+  onConnect,
+  onDisconnect,
   onOpenSettings,
   onClearHistory,
+  agentStatus,
+  connectionState,
+  micEnabled,
 }: DockProps) {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || connectionState.status !== "connected") return;
     onSend(input);
-    setInput('');
+    setInput("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      handleSubmit(e);
+    }
+  };
+
+  const isConnected = connectionState.status === "connected";
+  const isConnecting = connectionState.status === "connecting";
+
   return (
-    <div className="sticky bottom-0 w-full bg-gradient-to-t from-[#0A0A0C] via-[#0A0A0C]/90 to-transparent pb-6 pt-4 px-4">
-      <div className="max-w-3xl mx-auto flex flex-col gap-3">
+    <div className="sticky bottom-0 w-full pb-5 pt-3 px-4">
+      <div className="max-w-3xl mx-auto flex flex-col gap-2.5">
+        {connectionState.error && (
+          <div className="glass rounded-xl px-4 py-2.5 text-xs text-red-400/80 font-mono animate-fade-in">
+            {connectionState.error}
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
-          className="flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-2.5 shadow-2xl backdrop-blur-xl"
+          className="glass rounded-2xl px-4 py-3 flex items-center gap-3"
         >
           <button
             type="button"
-            onClick={onToggleListen}
-            className={`p-2.5 rounded-xl transition-all ${
-              listening
-                ? 'bg-red-500/20 text-red-400 border border-red-500/50 animate-pulse'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            onClick={onToggleMic}
+            disabled={!isConnected}
+            className={`p-2 rounded-lg transition-all duration-200 ${
+              !isConnected
+                ? "text-slate-600 cursor-not-allowed"
+                : micEnabled
+                ? "text-cyan-400 bg-cyan-500/10"
+                : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
             }`}
-            title={listening ? 'Stop listening' : 'Start voice input'}
+            title={micEnabled ? "Mute microphone" : "Unmute microphone"}
           >
-            {listening ? <MicOff size={20} /> : <Mic size={20} />}
+            {micEnabled ? <Mic size={18} /> : <MicOff size={18} />}
           </button>
 
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Jarvis or give a voice command..."
-            className="flex-1 bg-transparent border-none outline-none text-slate-100 placeholder-slate-500 text-sm font-sans"
+            onKeyDown={handleKeyDown}
+            placeholder={
+              isConnected
+                ? "Type a message..."
+                : "Connect to start..."
+            }
+            disabled={!isConnected}
+            className="flex-1 bg-transparent border-none outline-none text-slate-200 placeholder-slate-600 text-sm disabled:cursor-not-allowed disabled:opacity-40"
           />
-
-          {speaking && (
-            <button
-              type="button"
-              onClick={onStopSpeech}
-              className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30 transition-all"
-              title="Stop speaking"
-            >
-              <VolumeX size={20} />
-            </button>
-          )}
 
           <button
             type="submit"
-            disabled={!input.trim()}
-            className="p-2.5 rounded-xl bg-blue-600 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/30"
+            disabled={!input.trim() || !isConnected}
+            className="p-2 rounded-lg bg-blue-500/80 text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-blue-500 transition-all duration-200"
           >
-            <Send size={20} />
+            <Send size={18} />
           </button>
         </form>
 
-        <div className="flex items-center justify-between px-2 text-xs text-slate-500">
-          <div className="flex items-center gap-4">
-            <span>Project Jarvis PWA • Local First</span>
-          </div>
+        <div className="flex items-center justify-between px-1 text-[10px] text-slate-600 font-mono">
           <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isConnected
+                    ? "bg-emerald-500"
+                    : isConnecting
+                    ? "bg-amber-500 animate-pulse-subtle"
+                    : "bg-slate-600"
+                }`}
+              />
+              {isConnected ? "live" : isConnecting ? "connecting" : "offline"}
+            </span>
+            <span>jarvis v0.2</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!isConnected ? (
+              <button
+                onClick={onConnect}
+                disabled={isConnecting}
+                className="flex items-center gap-1 hover:text-slate-300 transition-colors disabled:opacity-40"
+              >
+                <Wifi size={12} />
+                {isConnecting ? "Connecting..." : "Connect"}
+              </button>
+            ) : (
+              <button
+                onClick={onDisconnect}
+                className="flex items-center gap-1 hover:text-slate-300 transition-colors"
+              >
+                <WifiOff size={12} />
+                Disconnect
+              </button>
+            )}
             <button
               onClick={onClearHistory}
               className="flex items-center gap-1 hover:text-slate-300 transition-colors"
-              title="Clear History"
+              title="Clear history"
             >
-              <Trash2 size={14} /> Clear
+              <Trash2 size={12} />
             </button>
             <button
               onClick={onOpenSettings}
               className="flex items-center gap-1 hover:text-slate-300 transition-colors"
               title="Settings"
             >
-              <Settings size={14} /> Settings
+              <Settings size={12} />
             </button>
           </div>
         </div>

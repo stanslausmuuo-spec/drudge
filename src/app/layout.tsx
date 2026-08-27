@@ -1,26 +1,34 @@
 import type { Metadata } from "next";
-import { Inter, Fira_Code } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const firaCode = Fira_Code({
-  variable: "--font-fira-code",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Project Jarvis",
-  description: "Voice-enabled, privacy-first personal AI assistant",
+  title: "Jarvis",
+  description: "Privacy-first voice-enabled personal AI assistant",
+  icons: { icon: "/favicon.ico" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${inter.variable} ${firaCode.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className="h-full antialiased">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[#06080f] font-sans">
+        {children}
+      </body>
     </html>
   );
 }

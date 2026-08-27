@@ -1,56 +1,65 @@
-export const STORAGE_KEY = 'jarvis_messages';
-export const SETTINGS_KEY = 'jarvis_settings';
+import { Message, Settings } from "@/types";
 
-export function getStoredMessages(): any[] {
-  if (typeof window === 'undefined') return [];
+const STORAGE_KEY = "jarvis_messages";
+const SETTINGS_KEY = "jarvis_settings";
+
+const DEFAULT_SETTINGS: Settings = {
+  voiceName: "",
+  speechRate: 1.0,
+  speechPitch: 1.0,
+  systemPrompt:
+    "You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant.",
+  autoSpeak: true,
+  sttProvider: "whisper",
+  ttsProvider: "piper",
+  ollamaModel: "llama3.1",
+};
+
+export function getStoredMessages(): Message[] {
+  if (typeof window === "undefined") return [];
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (m: any) =>
+        m &&
+        typeof m.id === "string" &&
+        typeof m.content === "string" &&
+        ["user", "assistant", "system"].includes(m.role)
+    );
+  } catch {
     return [];
   }
 }
 
-export function saveStoredMessages(messages: any[]) {
-  if (typeof window === 'undefined') return;
+export function saveStoredMessages(messages: Message[]): void {
+  if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Failed to save messages to localStorage:", e);
+  }
 }
 
-export function getStoredSettings(): any {
-  if (typeof window === 'undefined') {
-    return {
-      voiceName: '',
-      speechRate: 1.0,
-      speechPitch: 1.0,
-      systemPrompt: 'You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant.',
-      autoSpeak: true,
-    };
-  }
+export function getStoredSettings(): Settings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
     const data = localStorage.getItem(SETTINGS_KEY);
-    return data ? JSON.parse(data) : {
-      voiceName: '',
-      speechRate: 1.0,
-      speechPitch: 1.0,
-      systemPrompt: 'You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant.',
-      autoSpeak: true,
-    };
-  } catch (e) {
-    return {
-      voiceName: '',
-      speechRate: 1.0,
-      speechPitch: 1.0,
-      systemPrompt: 'You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant.',
-      autoSpeak: true,
-    };
+    if (!data) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(data);
+    return { ...DEFAULT_SETTINGS, ...parsed };
+  } catch {
+    return DEFAULT_SETTINGS;
   }
 }
 
-export function saveStoredSettings(settings: any) {
-  if (typeof window === 'undefined') return;
+export function saveStoredSettings(settings: Settings): void {
+  if (typeof window === "undefined") return;
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Failed to save settings to localStorage:", e);
+  }
 }

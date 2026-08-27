@@ -1,0 +1,67 @@
+services:
+  livekit-server:
+    image: livekit/livekit-server:latest
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+    command: --dev --bind 0.0.0.0 --redis-port 6379
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  jarvis-agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    depends_on:
+      - livekit-server
+      - ollama
+    environment:
+      - LIVEKIT_URL=ws://livekit-server:7880
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secret
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file:
+      - .env.local
+    restart: unless-stopped
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - whisper_models:/root/.cache/whisper
+    environment:
+      - ASR_MODEL=base
+      - ASR_ENGINE=openai_whisper
+    restart: unless-stopped
+
+  piper-tts:
+    image: rhasspy/wyoming-piper:latest
+    ports:
+      - "5000:5000"
+    command: --model en_US-lessac-medium.onnx
+    restart: unless-stopped
+
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - livekit-server
+      - jarvis-agent
+    env_file:
+      - .env.local
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  whisper_models:
