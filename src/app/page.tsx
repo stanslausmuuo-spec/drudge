@@ -13,7 +13,7 @@ import {
   getStoredSettings,
   saveStoredSettings,
 } from "@/lib/storage/localStorage";
-import { Settings } from "@/types";
+import { Settings, AIProvider } from "@/types";
 
 export default function Home() {
   const [settings, setSettings] = useState<Settings>({
@@ -26,9 +26,15 @@ export default function Home() {
     sttProvider: "whisper",
     ttsProvider: "piper",
     ollamaModel: "llama3.1",
+    defaultProvider: "ollama",
+    providers: [],
+    temperature: 0.7,
+    maxTokens: 4096,
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [micEnabled, setMicEnabled] = useState(true);
+  const [selectedModel, setSelectedModel] = useState("llama3.1");
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>("ollama");
 
   const {
     connectionState,
@@ -42,8 +48,11 @@ export default function Home() {
   } = useLiveKitSession();
 
   useEffect(() => {
+    const stored = getStoredSettings();
+    setSettings(stored);
+    setSelectedModel(stored.ollamaModel);
+    setSelectedProvider(stored.defaultProvider);
     setMessages(getStoredMessages());
-    setSettings(getStoredSettings());
   }, [setMessages]);
 
   useEffect(() => {
@@ -67,6 +76,8 @@ export default function Home() {
   const handleUpdateSettings = useCallback((newSettings: Settings) => {
     setSettings(newSettings);
     saveStoredSettings(newSettings);
+    setSelectedModel(newSettings.ollamaModel);
+    setSelectedProvider(newSettings.defaultProvider);
   }, []);
 
   const handleToggleMic = useCallback(async () => {
@@ -74,8 +85,19 @@ export default function Home() {
     setMicEnabled((prev) => !prev);
   }, [toggleMicrophone]);
 
+  const handleSelectModel = useCallback(
+    (modelId: string, provider: AIProvider) => {
+      setSelectedModel(modelId);
+      setSelectedProvider(provider);
+      const newSettings = { ...settings, ollamaModel: modelId, defaultProvider: provider };
+      setSettings(newSettings);
+      saveStoredSettings(newSettings);
+    },
+    [settings]
+  );
+
   return (
-    <main className="flex flex-col h-screen bg-[#06080f] text-slate-100 overflow-hidden">
+    <main className="flex flex-col h-screen bg-jarvis-bg text-slate-100 overflow-hidden">
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 glass z-20">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
@@ -111,6 +133,9 @@ export default function Home() {
         agentStatus={agentStatus}
         connectionState={connectionState}
         micEnabled={micEnabled}
+        selectedModel={selectedModel}
+        selectedProvider={selectedProvider}
+        onSelectModel={handleSelectModel}
       />
 
       <SettingsModal

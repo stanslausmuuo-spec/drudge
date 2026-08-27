@@ -13,6 +13,10 @@ const DEFAULT_SETTINGS: Settings = {
   sttProvider: "whisper",
   ttsProvider: "piper",
   ollamaModel: "llama3.1",
+  defaultProvider: "ollama",
+  providers: [],
+  temperature: 0.7,
+  maxTokens: 4096,
 };
 
 export function getStoredMessages(): Message[] {

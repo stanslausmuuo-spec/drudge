@@ -9,8 +9,9 @@ import {
   Trash2,
   Wifi,
   WifiOff,
+  ChevronDown,
 } from "lucide-react";
-import { AgentStatus, ConnectionState } from "@/types";
+import { AgentStatus, ConnectionState, AIProvider, AVAILABLE_MODELS } from "@/types";
 
 interface DockProps {
   onSend: (text: string) => void;
@@ -22,7 +23,17 @@ interface DockProps {
   agentStatus: AgentStatus;
   connectionState: ConnectionState;
   micEnabled: boolean;
+  selectedModel: string;
+  selectedProvider: AIProvider;
+  onSelectModel: (modelId: string, provider: AIProvider) => void;
 }
+
+const PROVIDER_COLORS: Record<AIProvider, string> = {
+  openai: "text-emerald-400",
+  anthropic: "text-violet-400",
+  google: "text-blue-400",
+  ollama: "text-amber-400",
+};
 
 export default function FloatingDock({
   onSend,
@@ -34,8 +45,12 @@ export default function FloatingDock({
   agentStatus,
   connectionState,
   micEnabled,
+  selectedModel,
+  selectedProvider,
+  onSelectModel,
 }: DockProps) {
   const [input, setInput] = useState("");
+  const [showModelPicker, setShowModelPicker] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +67,17 @@ export default function FloatingDock({
 
   const isConnected = connectionState.status === "connected";
   const isConnecting = connectionState.status === "connecting";
+
+  const selectedModelData = AVAILABLE_MODELS.find((m) => m.id === selectedModel);
+
+  const groupedModels = AVAILABLE_MODELS.reduce(
+    (acc, model) => {
+      if (!acc[model.provider]) acc[model.provider] = [];
+      acc[model.provider].push(model);
+      return acc;
+    },
+    {} as Record<AIProvider, typeof AVAILABLE_MODELS>
+  );
 
   return (
     <div className="sticky bottom-0 w-full pb-5 pt-3 px-4">

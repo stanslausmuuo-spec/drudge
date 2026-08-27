@@ -10,10 +10,16 @@ const config: Config = {
     extend: {
       colors: {
         jarvis: {
-          bg: "#06080f",
-          surface: "#0c1019",
+          bg: "#080a12",
+          surface: "#0f1320",
+          elevated: "#161c2e",
+          inset: "#06080e",
           accent: "#3b82f6",
+          "accent-hover": "#60a5fa",
           cyan: "#06b6d4",
+          success: "#10b981",
+          warning: "#f59e0b",
+          error: "#ef4444",
         },
       },
       fontFamily: {
