@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mic, MicOff, Send, Volume2, VolumeX, Settings, Trash2 } from 'lucide-react';
+import { Mic, MicOff, Send, VolumeX, Settings, Trash2 } from 'lucide-react';
 
 interface DockProps {
   onSend: (text: string) => void;
