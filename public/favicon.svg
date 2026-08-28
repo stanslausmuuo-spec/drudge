@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#f4eee2"/>
+  <g transform="translate(256, 256)">
+    <!-- Ink brush J stroke -->
+    <path d="M -12 -120 Q -8 -100, -6 -80 Q -4 -40, -4 -10 Q -4 20, -4 50 Q -4 80, 0 100 Q 4 115, 20 120 Q 35 122, 45 115 Q 55 105, 50 90 Q 45 78, 30 75 Q 18 73, 10 80" 
+          fill="none" 
+          stroke="#1a1a1a" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          opacity="0.85"/>
+    <!-- Ink bleed / texture dots -->
+    <circle cx="-8" cy="-75" r="2" fill="#1a1a1a" opacity="0.1"/>
+    <circle cx="3" cy="60" r="1.5" fill="#1a1a1a" opacity="0.08"/>
+    <circle cx="42" cy="95" r="1" fill="#1a1a1a" opacity="0.06"/>
+  </g>
+</svg>

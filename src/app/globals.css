@@ -3,41 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #080a12;
-  --bg-secondary: #0f1320;
-  --bg-elevated: #161c2e;
-  --bg-inset: #06080e;
-  --bg-panel: rgba(15, 19, 32, 0.70);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.10);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-accent: rgba(59, 130, 246, 0.30);
-  --accent-blue: #3b82f6;
-  --accent-blue-hover: #60a5fa;
-  --accent-cyan: #06b6d4;
-  --accent-dim: rgba(59, 130, 246, 0.15);
-  --text-primary: #e2e8f0;
-  --text-body: #cbd5e1;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-disabled: #475569;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
-  --font-fira-code: "Fira Code", ui-monospace, monospace;
+  --paper: #f4eee2;
+  --paper-dark: #e8dfd0;
+  --paper-inset: #ebe3d4;
+  --ink: #1a1a1a;
+  --ink-light: #4a4a4a;
+  --ink-muted: #7a7a7a;
+  --ink-faint: #a8a8a8;
+  --ink-wash: rgba(26, 26, 26, 0.06);
+  --ink-wash-strong: rgba(26, 26, 26, 0.12);
+  --vermillion: #c4392d;
+  --vermillion-dim: rgba(196, 57, 45, 0.12);
+  --moss: #3f6858;
+  --moss-dim: rgba(63, 104, 88, 0.12);
+  --ochre: #6a5a3a;
+  --ochre-dim: rgba(106, 90, 58, 0.12);
+  --shadow-warm: rgba(106, 90, 58, 0.08);
+  --shadow-deep: rgba(106, 90, 58, 0.15);
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 }
 
 html,
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-inter);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(59, 130, 246, 0.2) transparent;
+  scrollbar-color: var(--ink-wash-strong) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -49,88 +46,264 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.2);
+  background: var(--ink-wash-strong);
   border-radius: 2px;
 }
 
-.glass {
-  background: var(--bg-panel);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.30);
+/* ============================================
+   PAPER TEXTURE — ambient grain presence
+   ============================================ */
+.paper-texture {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(106, 90, 58, 0.03) 0%, transparent 50%),
+    var(--paper);
 }
 
-.glass-elevated {
-  background: rgba(22, 28, 46, 0.80);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid var(--border-default);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.40);
+.paper-texture::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  animation: grain-drift 30s linear infinite;
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass { background: rgba(15, 19, 32, 0.95); }
-  .glass-elevated { background: rgba(22, 28, 46, 0.98); }
+@keyframes grain-drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0, 0); }
 }
 
-.glass-input {
-  background: rgba(6, 8, 14, 0.60);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: var(--text-primary);
-  font-family: var(--font-inter);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+/* ============================================
+   INK SPREAD — tactile micro-interactions
+   ============================================ */
+.ink-spread {
+  position: relative;
+  overflow: hidden;
 }
 
-.glass-input:focus {
-  border-color: rgba(59, 130, 246, 0.40);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+.ink-spread::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(26, 26, 26, 0.04) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.ink-spread:hover::after {
+  opacity: 1;
+}
+
+/* Press effect — ink sinks into paper */
+.ink-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ink-press:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: inset 0 1px 3px rgba(26, 26, 26, 0.1);
+}
+
+/* ============================================
+   TOPOGRAPHIC CONTOUR LINES — ambient presence
+   ============================================ */
+.topo-lines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg width='800' height='800' viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%231a1a1a' stroke-width='0.5'%3E%3Cpath d='M 0 400 Q 200 350, 400 400 Q 600 450, 800 400'/%3E%3Cpath d='M 0 380 Q 180 330, 400 380 Q 620 430, 800 380'/%3E%3Cpath d='M 0 420 Q 220 370, 400 420 Q 580 470, 800 420'/%3E%3Cpath d='M 0 360 Q 160 310, 400 360 Q 640 410, 800 360'/%3E%3Cpath d='M 0 440 Q 240 390, 400 440 Q 560 490, 800 440'/%3E%3Cpath d='M 0 340 Q 140 290, 400 340 Q 660 390, 800 340'/%3E%3Cpath d='M 0 460 Q 260 410, 400 460 Q 540 510, 800 460'/%3E%3Cpath d='M 0 320 Q 120 270, 400 320 Q 680 370, 800 320'/%3E%3Cpath d='M 0 480 Q 280 430, 400 480 Q 520 530, 800 480'/%3E%3Cpath d='M 0 300 Q 100 250, 400 300 Q 700 350, 800 300'/%3E%3Cpath d='M 0 500 Q 300 450, 400 500 Q 500 550, 800 500'/%3E%3Cpath d='M 0 280 Q 80 230, 400 280 Q 720 330, 800 280'/%3E%3Cpath d='M 0 520 Q 320 470, 400 520 Q 480 570, 800 520'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  animation: topo-drift 60s ease-in-out infinite;
+}
+
+@keyframes topo-drift {
+  0%, 100% { opacity: 0.025; transform: translateY(0); }
+  50% { opacity: 0.035; transform: translateY(-2px); }
+}
+
+/* ============================================
+   BREATHING WARMTH — ambient color shift
+   ============================================ */
+.breathing-warmth {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  animation: warmth-breathe 20s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(106, 90, 58, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(196, 57, 45, 0.015) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(63, 104, 88, 0.01) 0%, transparent 60%);
+}
+
+@keyframes warmth-breathe {
+  0%, 100% { opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+}
+
+/* ============================================
+   INK WASH SURFACES
+   ============================================ */
+.ink-wash {
+  background: var(--paper);
+  box-shadow:
+    0 1px 2px var(--shadow-warm),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.ink-wash-elevated {
+  background: var(--paper);
+  box-shadow:
+    0 4px 20px var(--shadow-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ============================================
+   INK INPUTS
+   ============================================ */
+.ink-input {
+  background: var(--paper-inset);
+  border: 1px solid var(--ink-wash-strong);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ink-input:focus {
+  border-color: var(--ink-light);
+  box-shadow: 0 0 0 3px var(--ink-wash);
   outline: none;
 }
 
-.glass-input::placeholder {
-  color: var(--text-muted);
+.ink-input::placeholder {
+  color: var(--ink-muted);
 }
 
-@keyframes pulse-subtle {
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes ink-settle {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(3px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes ink-diffuse {
+  0%, 100% { opacity: 0.03; transform: scale(1) rotate(0deg); }
+  33% { opacity: 0.05; transform: scale(1.01) rotate(0.5deg); }
+  66% { opacity: 0.04; transform: scale(0.99) rotate(-0.3deg); }
+}
+
+@keyframes pulse-ink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  50% { opacity: 0.4; }
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes ink-bleed-in {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.7;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-ink-settle {
+  animation: ink-settle 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.animate-ink-diffuse {
+  animation: ink-diffuse 30s ease-in-out infinite;
+}
+
+.animate-pulse-ink {
+  animation: pulse-ink 2.5s ease-in-out infinite;
+}
+
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s ease-in-out infinite;
+.animate-ink-bleed {
+  animation: ink-bleed-in 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-.animate-spin-slow {
-  animation: spin-slow 1.5s linear infinite;
+.animate-slide-up {
+  animation: slide-up-fade 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-/* Custom Range Slider */
+/* Staggered children animation */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in-up 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 80ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 160ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 320ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 400ms; }
+
+/* ============================================
+   CUSTOM RANGE SLIDER — ink style
+   ============================================ */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
+  height: 2px;
+  background: var(--ink-wash-strong);
+  border-radius: 1px;
   outline: none;
   cursor: pointer;
 }
@@ -138,66 +311,92 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #3b82f6;
+  width: 14px;
+  height: 14px;
+  background: var(--ink);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.40);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.50);
+  transform: scale(1.3);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.1);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #3b82f6;
+  width: 14px;
+  height: 14px;
+  background: var(--ink);
   border-radius: 50%;
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.40);
 }
 
-/* Tab styles */
-.tab-active {
-  color: var(--text-primary);
-  border-bottom-color: var(--accent-blue);
+/* ============================================
+   BADGES
+   ============================================ */
+.seal-badge {
+  background: var(--vermillion);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  transform: rotate(-2deg);
+  display: inline-block;
 }
 
-.tab-inactive {
-  color: var(--text-muted);
-  border-bottom-color: transparent;
-}
-
-.tab-inactive:hover {
-  color: var(--text-secondary);
-}
-
-/* Status badge */
 .badge-success {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.20);
+  background: var(--moss-dim);
+  color: var(--moss);
+  border: 1px solid rgba(63, 104, 88, 0.2);
 }
 
 .badge-error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.20);
+  background: var(--vermillion-dim);
+  color: var(--vermillion);
+  border: 1px solid rgba(196, 57, 45, 0.2);
 }
 
 .badge-warning {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.20);
+  background: var(--ochre-dim);
+  color: var(--ochre);
+  border: 1px solid rgba(106, 90, 58, 0.2);
 }
 
-.badge-neutral {
-  background: rgba(148, 163, 184, 0.10);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+/* ============================================
+   SELECTION STYLE
+   ============================================ */
+::selection {
+  background: rgba(26, 26, 26, 0.12);
+  color: var(--ink);
+}
+
+/* ============================================
+   FOCUS VISIBLE — accessible focus rings
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .paper-texture::before {
+    animation: none;
+  }
 }
