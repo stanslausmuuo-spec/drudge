@@ -6,31 +6,32 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
         paper: {
-          DEFAULT: "#e8dfd0",
-          dark: "#d8ccb8",
-          inset: "#ddd2c0",
+          DEFAULT: "var(--paper)",
+          dark: "var(--paper-dark)",
+          inset: "var(--paper-inset)",
         },
         ink: {
-          DEFAULT: "#1a1a1a",
-          light: "#4a4a4a",
-          muted: "#7a7a7a",
-          faint: "#a8a8a8",
+          DEFAULT: "var(--ink)",
+          light: "var(--ink-light)",
+          muted: "var(--ink-muted)",
+          faint: "var(--ink-faint)",
         },
         vermillion: {
-          DEFAULT: "#c4392d",
-          dim: "rgba(196, 57, 45, 0.12)",
+          DEFAULT: "var(--vermillion)",
+          dim: "var(--vermillion-dim)",
         },
         moss: {
-          DEFAULT: "#3f6858",
-          dim: "rgba(63, 104, 88, 0.12)",
+          DEFAULT: "var(--moss)",
+          dim: "var(--moss-dim)",
         },
         ochre: {
-          DEFAULT: "#6a5a3a",
-          dim: "rgba(106, 90, 58, 0.12)",
+          DEFAULT: "var(--ochre)",
+          dim: "var(--ochre-dim)",
         },
       },
       fontFamily: {

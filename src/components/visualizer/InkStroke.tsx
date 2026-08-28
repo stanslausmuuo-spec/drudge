@@ -8,6 +8,7 @@ interface InkStrokeProps {
   audioData?: Uint8Array;
   volume?: number;
   className?: string;
+  theme?: "light" | "dark" | "system";
 }
 
 // ============================================
@@ -49,7 +50,7 @@ function warpedNoise(x: number, time: number, warp: number = 0.3): number {
 // INK STROKE RENDERER
 // ============================================
 
-export default function InkStroke({ status, audioData, volume = 0, className = "" }: InkStrokeProps) {
+export default function InkStroke({ status, audioData, volume = 0, className = "", theme = "light" }: InkStrokeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -60,6 +61,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
 
   const isIdle = status === "idle" || status === "disconnected";
   const isTransitioning = prevStatusRef.current !== status;
+  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  // Ink colors: dark mode = light cream ink, light mode = dark ink
+  const inkColor: [number, number, number] = isDark ? [232, 223, 208] : [26, 26, 26];
+  const ochreColor: [number, number, number] = isDark ? [160, 138, 90] : [106, 90, 58];
 
   const getConfig = useCallback(() => {
     switch (status) {
@@ -69,11 +75,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
           frequency: 0.8,
           speed: 0.002,
           baseWidth: 2.0,
-          opacity: 0.1,
+          opacity: 0.15,
           bleed: 0,
           particles: 0,
           irregularity: 0.3,
-          color: [26, 26, 26],
+          color: inkColor,
         };
       case "connecting":
         return {
@@ -81,11 +87,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
           frequency: 1.2,
           speed: 0.008,
           baseWidth: 1.8,
-          opacity: 0.15,
+          opacity: 0.2,
           bleed: 1,
           particles: 0,
           irregularity: 0.5,
-          color: [106, 90, 58],
+          color: ochreColor,
         };
       case "listening":
         return {
@@ -93,11 +99,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
           frequency: 1.0,
           speed: 0.015,
           baseWidth: 2.5,
-          opacity: 0.4,
+          opacity: 0.5,
           bleed: 2,
           particles: 4,
           irregularity: 0.7,
-          color: [26, 26, 26],
+          color: inkColor,
         };
       case "thinking":
         return {
@@ -105,11 +111,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
           frequency: 1.8,
           speed: 0.02,
           baseWidth: 2.2,
-          opacity: 0.3,
+          opacity: 0.4,
           bleed: 1.5,
           particles: 10,
           irregularity: 0.6,
-          color: [26, 26, 26],
+          color: inkColor,
         };
       case "speaking":
         return {
@@ -117,11 +123,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
           frequency: 1.2,
           speed: 0.018,
           baseWidth: 3.0,
-          opacity: 0.55,
+          opacity: 0.6,
           bleed: 3,
           particles: 3,
           irregularity: 0.8,
-          color: [26, 26, 26],
+          color: inkColor,
         };
       default:
         return {
@@ -129,14 +135,14 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
           frequency: 0.8,
           speed: 0.002,
           baseWidth: 2.0,
-          opacity: 0.1,
+          opacity: 0.15,
           bleed: 0,
           particles: 0,
           irregularity: 0.3,
-          color: [26, 26, 26],
+          color: inkColor,
         };
     }
-  }, [status]);
+  }, [status, inkColor, ochreColor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -423,7 +429,9 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
         <span
           className="font-mono text-[9px] uppercase tracking-[0.2em] select-none transition-all duration-1000"
           style={{
-            color: status === "idle" ? "rgba(26,26,26,0.15)" : "rgba(26,26,26,0.3)",
+            color: isDark
+              ? (status === "idle" ? "rgba(232,223,208,0.15)" : "rgba(232,223,208,0.3)")
+              : (status === "idle" ? "rgba(26,26,26,0.15)" : "rgba(26,26,26,0.3)"),
             opacity: status === "idle" ? 0.5 : 1,
           }}
         >

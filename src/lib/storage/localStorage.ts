@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
   providers: [],
   temperature: 0.7,
   maxTokens: 4096,
+  theme: "system",
 };
 
 export function getStoredMessages(): Message[] {

@@ -85,6 +85,28 @@ export default function SettingsPanel({
             </p>
           </section>
 
+          {/* Theme — primary visual choice */}
+          <section className="animate-slide-up" style={{ animationDelay: "0ms" }}>
+            <label className="block font-mono text-[9px] uppercase tracking-[0.15em] text-ink-faint mb-3">
+              Appearance
+            </label>
+            <div className="flex gap-2">
+              {(["light", "dark", "system"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => onUpdateSettings({ ...settings, theme: mode })}
+                  className={`ink-press flex-1 py-2 px-3 rounded border text-[11px] font-mono uppercase tracking-[0.1em] transition-all duration-300 ${
+                    settings.theme === mode
+                      ? "border-ink bg-ink text-paper"
+                      : "border-ink-wash-strong text-ink-muted hover:border-ink-light"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </section>
+
           {/* Model — handwritten note style */}
           <section className="animate-slide-up" style={{ animationDelay: "60ms" }}>
             <label className="block font-mono text-[9px] uppercase tracking-[0.15em] text-ink-faint mb-3">

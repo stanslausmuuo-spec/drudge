@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useTheme } from "next-themes";
 import InkStroke from "@/components/visualizer/InkStroke";
 import KineticText from "@/components/chat/KineticText";
 import ActivityPanel, { ActivityStep } from "@/components/activity/ActivityPanel";
@@ -29,6 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   providers: [],
   temperature: 0.7,
   maxTokens: 4096,
+  theme: "system",
 };
 
 export default function Home() {
@@ -54,17 +56,19 @@ export default function Home() {
   } = useLiveKitSession();
 
   const { playInkStroke, playKeyClick } = useAmbientSound();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     const stored = getStoredSettings();
     setSettings(stored);
     setMessages(getStoredMessages());
+    setTheme(stored.theme);
 
     const hasCompletedOnboarding = localStorage.getItem("jarvis_onboarded");
     if (!hasCompletedOnboarding) {
       setShowOnboarding(true);
     }
-  }, [setMessages]);
+  }, [setMessages, setTheme]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -121,7 +125,8 @@ export default function Home() {
   const handleUpdateSettings = useCallback((newSettings: Settings) => {
     setSettings(newSettings);
     saveStoredSettings(newSettings);
-  }, []);
+    setTheme(newSettings.theme);
+  }, [setTheme]);
 
   const handleToggleMic = useCallback(async () => {
     await toggleMicrophone();
@@ -288,7 +293,7 @@ export default function Home() {
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 overflow-hidden">
         {/* Ink stroke — the hero */}
         <div className="w-full max-w-xl mb-10 animate-ink-bleed">
-          <InkStroke status={agentStatus} volume={0} className="mx-auto" />
+          <InkStroke status={agentStatus} volume={0} theme={settings.theme} className="mx-auto" />
         </div>
 
         {/* Response area */}
