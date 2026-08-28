@@ -10,7 +10,7 @@ def generate_favicon(size):
 
     # Rounded rect paper background
     r = int(96 * s)
-    draw.rounded_rectangle([0, 0, size - 1, size - 1], radius=r, fill=(244, 238, 226, 255))
+    draw.rounded_rectangle([0, 0, size - 1, size - 1], radius=r, fill=(232, 223, 208, 255))
 
     # Center
     cx, cy = size // 2, size // 2

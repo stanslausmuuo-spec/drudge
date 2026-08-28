@@ -206,7 +206,7 @@ export default function Home() {
           <div className="relative text-center px-8 max-w-lg stagger-children">
             {/* Large J mark */}
             <div className="mb-12">
-              <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto opacity-20">
+              <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto opacity-40">
                 <path
                   d="M 35 8 Q 37 20, 38 35 Q 39 50, 39 58 Q 39 65, 42 70 Q 46 76, 55 78 Q 62 79, 66 75 Q 70 70, 65 65 Q 60 62, 52 64"
                   fill="none"
@@ -220,10 +220,10 @@ export default function Home() {
             <h1 className="font-serif text-5xl font-medium text-ink mb-4 tracking-tight">
               Jarvis
             </h1>
-            <p className="text-sm text-ink-muted leading-relaxed mb-3 max-w-xs mx-auto">
+            <p className="text-sm text-ink/70 leading-relaxed mb-3 max-w-xs mx-auto">
               A privacy-first AI assistant.
             </p>
-            <p className="text-xs text-ink-faint leading-relaxed mb-12 max-w-xs mx-auto">
+            <p className="text-xs text-ink/50 leading-relaxed mb-12 max-w-xs mx-auto">
               Everything runs on your machine. Nothing leaves your device.
             </p>
 
@@ -236,7 +236,7 @@ export default function Home() {
               </span>
             </button>
 
-            <p className="mt-8 text-[10px] font-mono text-ink-faint uppercase tracking-wider">
+            <p className="mt-8 text-[10px] font-mono text-ink/50 uppercase tracking-wider">
               tap to wake
             </p>
           </div>
@@ -248,7 +248,7 @@ export default function Home() {
           ============================================ */}
       <header className="relative z-10 flex items-center justify-between px-8 py-4">
         <div className="flex items-center gap-3">
-          <h1 className="font-serif text-base font-medium text-ink/40 tracking-tight">
+          <h1 className="font-serif text-base font-medium text-ink/70 tracking-tight">
             Jarvis
           </h1>
         </div>
@@ -259,23 +259,23 @@ export default function Home() {
             <div
               className={`w-1.5 h-1.5 rounded-full transition-colors duration-700 ${
                 isConnected
-                  ? "bg-ink/30"
+                  ? "bg-ink/60"
                   : isConnecting
                   ? "bg-ochre animate-pulse-ink"
-                  : "bg-ink/10"
+                  : "bg-ink/30"
               }`}
             />
           </div>
 
           <button
             onClick={handleClearHistory}
-            className="ink-press font-mono text-[10px] uppercase tracking-[0.12em] text-ink-faint/50 hover:text-ink-muted transition-colors duration-300"
+            className="ink-press font-mono text-[10px] uppercase tracking-[0.12em] text-ink/50 hover:text-ink transition-colors duration-300"
           >
             clear
           </button>
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="ink-press font-mono text-[10px] uppercase tracking-[0.12em] text-ink-faint/50 hover:text-ink-muted transition-colors duration-300"
+            className="ink-press font-mono text-[10px] uppercase tracking-[0.12em] text-ink/50 hover:text-ink transition-colors duration-300"
           >
             settings
           </button>
@@ -297,7 +297,7 @@ export default function Home() {
           {olderPairs.length > 0 && (
             <div className="w-full space-y-6 mb-8">
               {olderPairs.map((pair, idx) => {
-                const opacity = 0.08 + (idx / olderPairs.length) * 0.07;
+                const opacity = 0.2 + (idx / olderPairs.length) * 0.15;
                 return (
                   <div
                     key={pair.user.id}
@@ -305,19 +305,19 @@ export default function Home() {
                     style={{ opacity }}
                   >
                     <div className="text-right mb-2">
-                      <p className="font-serif text-sm text-ink/40 italic">
+                      <p className="font-serif text-sm text-ink/60 italic">
                         {pair.user.content}
                       </p>
                     </div>
                     {pair.assistant && (
                       <div className="text-left">
-                        <p className="font-serif text-sm text-ink/30 leading-relaxed line-clamp-2">
+                        <p className="font-serif text-sm text-ink/50 leading-relaxed line-clamp-2">
                           {pair.assistant.content}
                         </p>
                       </div>
                     )}
                     {/* Ink wash divider */}
-                    <div className="mt-4 mx-auto w-16 h-px bg-gradient-to-r from-transparent via-ink/8 to-transparent" />
+                    <div className="mt-4 mx-auto w-16 h-px bg-gradient-to-r from-transparent via-ink/15 to-transparent" />
                   </div>
                 );
               })}
@@ -328,7 +328,7 @@ export default function Home() {
           {latestPair && (
             <>
               <div className="text-right w-full mb-6 animate-ink-settle">
-                <p className="font-serif text-lg text-ink/35 italic">
+                <p className="font-serif text-lg text-ink/65 italic">
                   {latestPair.user.content}
                 </p>
               </div>
@@ -347,7 +347,7 @@ export default function Home() {
           {/* Empty state with no pairs yet */}
           {!lastAssistantMessage && !lastUserMessage && messagePairs.length === 0 && (
             <div className="text-center stagger-children">
-              <p className="font-serif text-[28px] text-ink/15 mb-3 italic">
+              <p className="font-serif text-[28px] text-ink/40 mb-3 italic">
                 {isConnected
                   ? "How can I help?"
                   : isConnecting
@@ -364,9 +364,9 @@ export default function Home() {
               )}
               {isConnecting && (
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  <div className="w-1 h-1 rounded-full bg-ink/20 animate-pulse-ink" />
-                  <div className="w-1 h-1 rounded-full bg-ink/20 animate-pulse-ink" style={{ animationDelay: "0.3s" }} />
-                  <div className="w-1 h-1 rounded-full bg-ink/20 animate-pulse-ink" style={{ animationDelay: "0.6s" }} />
+                  <div className="w-1 h-1 rounded-full bg-ink/40 animate-pulse-ink" />
+                  <div className="w-1 h-1 rounded-full bg-ink/40 animate-pulse-ink" style={{ animationDelay: "0.3s" }} />
+                  <div className="w-1 h-1 rounded-full bg-ink/40 animate-pulse-ink" style={{ animationDelay: "0.6s" }} />
                 </div>
               )}
             </div>
@@ -446,7 +446,7 @@ export default function Home() {
 
           {/* Ambient footer — almost invisible */}
           <div className="flex items-center justify-center mt-4">
-            <span className="font-mono text-[9px] text-ink-faint/25 uppercase tracking-[0.2em]">
+            <span className="font-mono text-[9px] text-ink/40 uppercase tracking-[0.2em]">
               jarvis · {settings.ollamaModel}
             </span>
           </div>

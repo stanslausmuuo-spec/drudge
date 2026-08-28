@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --paper: #f4eee2;
-  --paper-dark: #e8dfd0;
-  --paper-inset: #ebe3d4;
+  --paper: #e8dfd0;
+  --paper-dark: #d8ccb8;
+  --paper-inset: #ddd2c0;
   --ink: #1a1a1a;
   --ink-light: #4a4a4a;
   --ink-muted: #7a7a7a;
