@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   providers: [],
   temperature: 0.7,
   maxTokens: 4096,
-  theme: "paper",
+  theme: "dark",
 };
 
 export default function Home() {
@@ -41,8 +41,9 @@ export default function Home() {
   const [activitySteps, setActivitySteps] = useState<ActivityStep[]>([]);
   const [showActivity, setShowActivity] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const [, setHasInteracted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const {
     connectionState,
@@ -50,9 +51,10 @@ export default function Home() {
     messages,
     setMessages,
     connect,
-    disconnect,
     sendMessage,
     toggleMicrophone,
+    toggleCamera,
+    cameraEnabled,
   } = useLiveKitSession();
 
   const { playInkStroke, playKeyClick } = useAmbientSound();
@@ -75,6 +77,26 @@ export default function Home() {
       saveStoredMessages(messages);
     }
   }, [messages]);
+
+  // Handle local camera preview attachment
+  useEffect(() => {
+    if (cameraEnabled && videoRef.current) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch((err) => console.warn("Camera preview error:", err));
+    } else if (!cameraEnabled && videoRef.current) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [cameraEnabled]);
 
   // Track activity from agent status
   useEffect(() => {
@@ -141,18 +163,16 @@ export default function Home() {
 
   const handleConnect = useCallback(() => {
     setHasInteracted(true);
-    connect();
-  }, [connect]);
+    connect(settings);
+  }, [connect, settings]);
 
   const handleOnboardingComplete = useCallback(() => {
     localStorage.setItem("jarvis_onboarded", "true");
     setShowOnboarding(false);
     setHasInteracted(true);
-    // Auto-connect after onboarding
-    setTimeout(() => connect(), 300);
-  }, [connect]);
+    setTimeout(() => connect(settings), 300);
+  }, [connect, settings]);
 
-  // Track mouse for ink spread effect
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const el = e.currentTarget as HTMLElement;
     const rect = el.getBoundingClientRect();
@@ -162,7 +182,6 @@ export default function Home() {
     el.style.setProperty("--mouse-y", `${y}%`);
   }, []);
 
-  // Get recent conversation depth (last 3 exchanges)
   const messagePairs = React.useMemo(() => {
     const pairs: { user: typeof messages[0]; assistant: typeof messages[0] | null }[] = [];
     for (let i = 0; i < messages.length; i++) {
@@ -171,7 +190,7 @@ export default function Home() {
         pairs.push({ user: messages[i], assistant: assistantMsg });
       }
     }
-    return pairs.slice(-3); // last 3 exchanges
+    return pairs.slice(-3);
   }, [messages]);
 
   const lastAssistantMessage = [...messages]
@@ -189,30 +208,33 @@ export default function Home() {
 
   return (
     <main
-      className="flex flex-col h-screen bg-paper paper-texture overflow-hidden"
+      className="flex flex-col h-screen bg-paper paper-texture overflow-hidden relative"
       onMouseMove={handleMouseMove}
     >
-      {/* Ambient layers */}
       <div className="topo-lines" aria-hidden="true" />
       <div className="breathing-warmth" aria-hidden="true" />
-      {/* ============================================
-          ONBOARDING — voice-first wake experience
-          ============================================ */}
+
+      {/* Video Call Preview Tile */}
+      {cameraEnabled && (
+        <div className="absolute top-16 right-8 z-30 w-48 h-36 bg-ink-wash border border-ink-wash-strong rounded-xl overflow-hidden shadow-2xl animate-fade-in flex items-center justify-center">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover transform -scale-x-100"
+          />
+          <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-ink/60 text-[9px] font-mono text-paper">
+            LIVE VISION
+          </div>
+        </div>
+      )}
+
+      {/* ONBOARDING */}
       {showOnboarding && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-paper">
-          {/* Ambient grain */}
-          <div className="absolute inset-0 animate-ink-diffuse opacity-[0.03]"
-            style={{
-              backgroundImage: settings.theme === "neon"
-                ? `radial-gradient(ellipse at 30% 40%, rgba(3,255,40,0.08) 0%, transparent 50%),
-                   radial-gradient(ellipse at 70% 60%, rgba(3,255,40,0.04) 0%, transparent 50%)`
-                : `radial-gradient(ellipse at 30% 40%, rgba(106,90,58,0.08) 0%, transparent 50%),
-                   radial-gradient(ellipse at 70% 60%, rgba(196,57,45,0.04) 0%, transparent 50%)`,
-            }}
-          />
-
+          <div className="absolute inset-0 animate-ink-diffuse opacity-[0.03]" />
           <div className="relative text-center px-8 max-w-lg stagger-children">
-            {/* Large J mark */}
             <div className="mb-12">
               <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto opacity-40">
                 <path
@@ -224,17 +246,12 @@ export default function Home() {
                 />
               </svg>
             </div>
-
             <h1 className="font-serif text-5xl font-medium text-ink mb-4 tracking-tight">
               Jarvis
             </h1>
             <p className="text-sm text-ink/70 leading-relaxed mb-3 max-w-xs mx-auto">
-              A privacy-first AI assistant.
+              A privacy-first AI assistant & vision companion.
             </p>
-            <p className="text-xs text-ink/50 leading-relaxed mb-12 max-w-xs mx-auto">
-              Everything runs on your machine. Nothing leaves your device.
-            </p>
-
             <button
               onClick={handleOnboardingComplete}
               className="ink-press ink-spread group relative px-8 py-3.5 border border-ink-wash-strong text-ink rounded hover:border-ink-light transition-all duration-300"
@@ -243,7 +260,6 @@ export default function Home() {
                 Begin
               </span>
             </button>
-
             <p className="mt-8 text-[10px] font-mono text-ink/50 uppercase tracking-wider">
               tap to wake
             </p>
@@ -251,18 +267,14 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          HEADER — minimal, almost invisible
-          ============================================ */}
+      {/* HEADER */}
       <header className="relative z-10 flex items-center justify-between px-8 py-4">
         <div className="flex items-center gap-3">
           <h1 className="font-serif text-base font-medium text-ink/70 tracking-tight">
             Jarvis
           </h1>
         </div>
-
         <div className="flex items-center gap-5">
-          {/* Ambient status dot */}
           <div className="flex items-center gap-2">
             <div
               className={`w-1.5 h-1.5 rounded-full transition-colors duration-700 ${
@@ -274,7 +286,6 @@ export default function Home() {
               }`}
             />
           </div>
-
           <button
             onClick={handleClearHistory}
             className="ink-press font-mono text-[10px] uppercase tracking-[0.12em] text-ink/50 hover:text-ink transition-colors duration-300"
@@ -290,18 +301,13 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ============================================
-          MAIN — centered single-response view
-          ============================================ */}
+      {/* MAIN */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 overflow-hidden">
-        {/* Ink stroke — the hero */}
         <div className="w-full max-w-xl mb-10 animate-ink-bleed">
           <InkStroke status={agentStatus} volume={0} theme={settings.theme} className="mx-auto" />
         </div>
 
-        {/* Response area */}
         <div className="w-full max-w-xl min-h-[100px] flex flex-col items-center justify-center">
-          {/* Conversation depth — older exchanges fade into memory */}
           {olderPairs.length > 0 && (
             <div className="w-full space-y-6 mb-8">
               {olderPairs.map((pair, idx) => {
@@ -324,7 +330,6 @@ export default function Home() {
                         </p>
                       </div>
                     )}
-                    {/* Ink wash divider */}
                     <div className="mt-4 mx-auto w-16 h-px bg-gradient-to-r from-transparent via-ink/15 to-transparent" />
                   </div>
                 );
@@ -332,7 +337,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Latest exchange — full opacity */}
           {latestPair && (
             <>
               <div className="text-right w-full mb-6 animate-ink-settle">
@@ -352,7 +356,6 @@ export default function Home() {
             </>
           )}
 
-          {/* Empty state with no pairs yet */}
           {!lastAssistantMessage && !lastUserMessage && messagePairs.length === 0 && (
             <div className="text-center stagger-children">
               <p className="font-serif text-[28px] text-ink/40 mb-3 italic">
@@ -382,9 +385,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ============================================
-          ACTIVITY PANEL — agentic transparency
-          ============================================ */}
+      {/* ACTIVITY PANEL */}
       <div className="relative z-10 px-8 pb-4">
         <div className="max-w-xl mx-auto">
           <ActivityPanel
@@ -395,9 +396,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ============================================
-          INPUT — single line, centered, breathing
-          ============================================ */}
+      {/* INPUT */}
       <div className="relative z-10 px-8 pb-8">
         <div className="max-w-xl mx-auto">
           {connectionState.error && (
@@ -427,6 +426,25 @@ export default function Home() {
               </svg>
             </button>
 
+            {/* Camera */}
+            <button
+              onClick={() => { toggleCamera(); playKeyClick(); }}
+              disabled={!isConnected}
+              className={`ink-press p-2 rounded transition-all duration-300 ${
+                !isConnected
+                  ? "text-ink-faint/30 cursor-not-allowed"
+                  : cameraEnabled
+                  ? "text-ink hover:text-ink bg-ink/10"
+                  : "text-ink-faint hover:text-ink-muted"
+              }`}
+              title={cameraEnabled ? "Disable Camera" : "Enable Camera (Video Call)"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 7l-7 5 7 5V7z" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+            </button>
+
             {/* Input */}
             <input
               ref={inputRef}
@@ -434,7 +452,7 @@ export default function Home() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isConnected ? "Ask something..." : ""}
+              placeholder={isConnected ? "Ask or share what you see..." : ""}
               disabled={!isConnected}
               className="flex-1 bg-transparent border-none outline-none text-ink placeholder-ink-faint/40 text-[15px] font-serif disabled:cursor-not-allowed disabled:opacity-30"
             />
@@ -452,7 +470,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Ambient footer — almost invisible */}
           <div className="flex items-center justify-center mt-4">
             <span className="font-mono text-[9px] text-ink/40 uppercase tracking-[0.2em]">
               jarvis · {settings.ollamaModel}
@@ -461,9 +478,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ============================================
-          SETTINGS PANEL
-          ============================================ */}
       {isSettingsOpen && (
         <SettingsPanel
           settings={settings}

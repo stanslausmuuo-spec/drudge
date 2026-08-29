@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { Room, RoomEvent, Track } from "livekit-client";
-import { AgentStatus, ConnectionState as ConnState, Message } from "@/types";
+import { AgentStatus, ConnectionState as ConnState, Message, Settings } from "@/types";
 
 const ROOM_NAME = "jarvis-room";
 const PARTICIPANT_NAME = `user-${Date.now()}`;
@@ -15,6 +15,7 @@ export function useLiveKitSession() {
   });
   const [agentStatus, setAgentStatus] = useState<AgentStatus>("disconnected");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
 
   const addMessage = useCallback(
     (role: "user" | "assistant" | "system", content: string) => {
@@ -30,7 +31,7 @@ export function useLiveKitSession() {
     []
   );
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (settings?: Settings) => {
     if (roomRef.current) return;
 
     setConnectionState({ status: "connecting", error: null });
@@ -43,6 +44,8 @@ export function useLiveKitSession() {
         body: JSON.stringify({
           roomName: ROOM_NAME,
           participantName: PARTICIPANT_NAME,
+          model: settings?.ollamaModel || "llama3.1",
+          providers: settings?.providers || [],
         }),
       });
 
@@ -60,6 +63,9 @@ export function useLiveKitSession() {
           noiseSuppression: true,
           autoGainControl: true,
         },
+        videoCaptureDefaults: {
+          resolution: { width: 1280, height: 720, frameRate: 30 },
+        },
       });
 
       newRoom.on(RoomEvent.Connected, () => {
@@ -71,14 +77,15 @@ export function useLiveKitSession() {
         setConnectionState({ status: "disconnected", error: null });
         setAgentStatus("disconnected");
         roomRef.current = null;
+        setCameraEnabled(false);
       });
 
       newRoom.on(
         RoomEvent.TrackSubscribed,
         (trackPublication) => {
           if (trackPublication.kind === Track.Kind.Audio) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const audioTrack = (trackPublication as any).track;
+            // @ts-ignore
+            const audioTrack = trackPublication.track;
             if (audioTrack && typeof audioTrack.attach === "function") {
               const audioElement = audioTrack.attach();
               if (audioElement) {
@@ -147,6 +154,7 @@ export function useLiveKitSession() {
     }
     setConnectionState({ status: "disconnected", error: null });
     setAgentStatus("disconnected");
+    setCameraEnabled(false);
   }, []);
 
   const sendMessage = useCallback(
@@ -169,6 +177,13 @@ export function useLiveKitSession() {
     await roomRef.current.localParticipant.setMicrophoneEnabled(!enabled);
   }, []);
 
+  const toggleCamera = useCallback(async () => {
+    if (!roomRef.current) return;
+    const enabled = roomRef.current.localParticipant.isCameraEnabled;
+    await roomRef.current.localParticipant.setCameraEnabled(!enabled);
+    setCameraEnabled(!enabled);
+  }, []);
+
   return {
     connectionState,
     agentStatus,
@@ -178,6 +193,8 @@ export function useLiveKitSession() {
     disconnect,
     sendMessage,
     toggleMicrophone,
+    toggleCamera,
+    cameraEnabled,
     addMessage,
   };
 }

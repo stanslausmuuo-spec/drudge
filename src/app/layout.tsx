@@ -53,7 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-paper font-sans">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem themes={["paper", "neon", "system"]}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem themes={["dark", "neon", "light", "system"]}>
           {children}
         </ThemeProvider>
       </body>

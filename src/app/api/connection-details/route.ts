@@ -7,7 +7,7 @@ const LIVEKIT_URL = process.env.LIVEKIT_URL || "ws://localhost:7880";
 
 export async function POST(req: NextRequest) {
   try {
-    const { roomName, participantName } = await req.json();
+    const { roomName, participantName, model, providers } = await req.json();
 
     if (!roomName || !participantName) {
       return NextResponse.json(
@@ -18,6 +18,10 @@ export async function POST(req: NextRequest) {
 
     const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity: participantName,
+      attributes: {
+        model: model || "llama3.1",
+        providers: JSON.stringify(providers || []),
+      },
     });
 
     at.addGrant({

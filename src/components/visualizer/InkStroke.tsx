@@ -8,7 +8,7 @@ interface InkStrokeProps {
   audioData?: Uint8Array;
   volume?: number;
   className?: string;
-  theme?: "paper" | "neon" | "system";
+  theme?: "dark" | "neon" | "light" | "system";
 }
 
 // ============================================
@@ -50,7 +50,7 @@ function warpedNoise(x: number, time: number, warp: number = 0.3): number {
 // INK STROKE RENDERER
 // ============================================
 
-export default function InkStroke({ status, audioData, volume = 0, className = "", theme = "paper" }: InkStrokeProps) {
+export default function InkStroke({ status, audioData, volume = 0, className = "", theme = "dark" }: InkStrokeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -61,11 +61,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
 
   const isIdle = status === "idle" || status === "disconnected";
   const isTransitioning = prevStatusRef.current !== status;
-  const isDark = theme === "neon" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark = theme === "neon" || theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const isNeon = theme === "neon";
 
   // Ink colors per theme
-  const inkColor: [number, number, number] = isNeon ? [3, 255, 40] : isDark ? [232, 223, 208] : [26, 26, 26];
+  const inkColor: [number, number, number] = isNeon ? [3, 255, 40] : isDark ? [255, 255, 255] : [0, 0, 0];
   const ochreColor: [number, number, number] = isNeon ? [3, 255, 40] : isDark ? [160, 138, 90] : [106, 90, 58];
 
   const getConfig = useCallback(() => {
