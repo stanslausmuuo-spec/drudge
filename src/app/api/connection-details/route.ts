@@ -16,6 +16,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (process.env.NODE_ENV === "production" && (LIVEKIT_API_KEY === "devkey" || LIVEKIT_URL.includes("localhost"))) {
+      return NextResponse.json(
+        { error: "LiveKit is not configured for production. Please set LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL environment variables in Vercel." },
+        { status: 500 }
+      );
+    }
+
     const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity: participantName,
       attributes: {

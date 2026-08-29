@@ -347,7 +347,7 @@ input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.1); }
 
 /* ============================================
    LIGHT THEME — white background, black text
-   ============================================ *//
+   ============================================ */
 .light {
   --paper: #ffffff;
   --paper-dark: #f8fafc;
