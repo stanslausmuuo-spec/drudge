@@ -21,6 +21,7 @@ from livekit.agents import (
     llm,
 )
 from livekit.plugins import openai, silero
+from openai import AsyncOpenAI
 
 load_dotenv()
 
@@ -182,7 +183,12 @@ async def entrypoint(ctx: JobContext):
         llm_plugin = openai.LLM(model=selected_model, api_key=api_key, base_url="https://api.anthropic.com/v1")
     elif provider_type == "google" and api_key:
         logger.info("Using Google Gemini model via API key")
-        llm_plugin = openai.LLM(model=selected_model, api_key=api_key, base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
+        client = AsyncOpenAI(
+            api_key="",
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            default_headers={"x-goog-api-key": api_key},
+        )
+        llm_plugin = openai.LLM(model=selected_model, client=client)
     else:
         logger.info("Using local Ollama LLM (%s)", selected_model)
         llm_plugin = openai.LLM.with_ollama(
