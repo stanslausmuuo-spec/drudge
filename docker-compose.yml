@@ -1,18 +1,28 @@
 services:
   livekit-server:
-    image: livekit/livekit-server:latest
+    image: livekit/livekit-server:v1.8.2
     ports:
       - "7880:7880"
       - "7881:7881"
     command: --dev --bind 0.0.0.0 --redis-port 6379
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "7880"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.5.7
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   jarvis-agent:
@@ -20,8 +30,10 @@ services:
       context: ./agent
       dockerfile: Dockerfile
     depends_on:
-      - livekit-server
-      - ollama
+      livekit-server:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
     environment:
       - LIVEKIT_URL=ws://livekit-server:7880
       - LIVEKIT_API_KEY=devkey
@@ -40,6 +52,11 @@ services:
     environment:
       - ASR_MODEL=base
       - ASR_ENGINE=openai_whisper
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   piper-tts:
@@ -47,6 +64,11 @@ services:
     ports:
       - "5000:5000"
     command: --model en_US-lessac-medium.onnx
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   nextjs:
@@ -56,8 +78,10 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - livekit-server
-      - jarvis-agent
+      livekit-server:
+        condition: service_healthy
+      jarvis-agent:
+        condition: service_started
     env_file:
       - .env.local
     restart: unless-stopped
