@@ -32,18 +32,10 @@ export default function SettingsPanel({
       />
 
         {/* Panel — journal page */}
-        <div className="relative w-full max-w-md bg-paper border-l border-ink-wash h-full overflow-y-auto animate-ink-bleed"
-          style={{
-            boxShadow: "-4px 0 30px rgba(106, 90, 58, 0.08), inset 1px 0 0 rgba(255,255,255,0.3)",
-          }}
-        >
+        <div className="relative w-full max-w-md bg-paper border-l border-ink-wash h-full overflow-y-auto animate-ink-bleed settings-panel">
         {/* Paper texture overlay */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.02]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 30%, rgba(106,90,58,0.3) 0%, transparent 40%),
-                             radial-gradient(circle at 80% 70%, rgba(196,57,45,0.1) 0%, transparent 40%)`,
-          }}
+          className="absolute inset-0 pointer-events-none opacity-[0.02] settings-panel-texture"
         />
 
         {/* Header */}
@@ -91,7 +83,7 @@ export default function SettingsPanel({
               Appearance
             </label>
             <div className="flex gap-2">
-              {(["light", "dark", "system"] as const).map((mode) => (
+              {(["paper", "neon", "system"] as const).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => onUpdateSettings({ ...settings, theme: mode })}
@@ -255,10 +247,7 @@ export default function SettingsPanel({
           <section className="animate-slide-up" style={{ animationDelay: "360ms" }}>
             <div className="space-y-2.5">
               {[
-                ["Version", "0.2.0"],
-                ["Frontend", "Next.js 14"],
-                ["Agent", "LiveKit + Python"],
-                ["Voice", "Whisper + Piper"],
+                ["Version", "0.2.0"]
               ].map(([label, value]) => (
                 <div key={label} className="flex items-baseline justify-between">
                   <span className="text-[11px] text-ink-faint font-mono uppercase tracking-wider">

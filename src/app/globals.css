@@ -444,6 +444,123 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================
+   NEON THEME — dark + neon green accent
+   ============================================ */
+.neon {
+  --paper: #0d0d0d;
+  --paper-dark: #080808;
+  --paper-inset: #141414;
+  --ink: #ffffff;
+  --ink-light: #cccccc;
+  --ink-muted: #888888;
+  --ink-faint: #555555;
+  --ink-wash: rgba(255, 255, 255, 0.06);
+  --ink-wash-strong: rgba(255, 255, 255, 0.12);
+  --vermillion: #03ff28;
+  --vermillion-dim: rgba(3, 255, 40, 0.12);
+  --moss: #03ff28;
+  --moss-dim: rgba(3, 255, 40, 0.10);
+  --ochre: #03ff28;
+  --ochre-dim: rgba(3, 255, 40, 0.08);
+  --shadow-warm: rgba(3, 255, 40, 0.05);
+  --shadow-deep: rgba(3, 255, 40, 0.10);
+}
+
+.neon .paper-texture {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(3, 255, 40, 0.02) 0%, transparent 50%),
+    var(--paper);
+}
+
+.neon .paper-texture::before {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+.neon .topo-lines {
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg width='800' height='800' viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2303ff28' stroke-width='0.5'%3E%3Cpath d='M 0 400 Q 200 350, 400 400 Q 600 450, 800 400'/%3E%3Cpath d='M 0 380 Q 180 330, 400 380 Q 620 430, 800 380'/%3E%3Cpath d='M 0 420 Q 220 370, 400 420 Q 580 470, 800 420'/%3E%3Cpath d='M 0 360 Q 160 310, 400 360 Q 640 410, 800 360'/%3E%3Cpath d='M 0 440 Q 240 390, 400 440 Q 560 490, 800 440'/%3E%3Cpath d='M 0 340 Q 140 290, 400 340 Q 660 390, 800 340'/%3E%3Cpath d='M 0 460 Q 260 410, 400 460 Q 540 510, 800 460'/%3E%3Cpath d='M 0 320 Q 120 270, 400 320 Q 680 370, 800 320'/%3E%3Cpath d='M 0 480 Q 280 430, 400 480 Q 520 530, 800 480'/%3E%3Cpath d='M 0 300 Q 100 250, 400 300 Q 700 350, 800 300'/%3E%3Cpath d='M 0 500 Q 300 450, 400 500 Q 500 550, 800 500'/%3E%3Cpath d='M 0 280 Q 80 230, 400 280 Q 720 330, 800 280'/%3E%3Cpath d='M 0 520 Q 320 470, 400 520 Q 480 570, 800 520'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.neon .breathing-warmth {
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(3, 255, 40, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(3, 255, 40, 0.015) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(3, 255, 40, 0.01) 0%, transparent 60%);
+}
+
+.neon .ink-spread::after {
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(3, 255, 40, 0.04) 0%,
+    transparent 60%
+  );
+}
+
+.neon .ink-press:active {
+  box-shadow: inset 0 1px 3px rgba(3, 255, 40, 0.15);
+}
+
+.neon .ink-wash {
+  box-shadow:
+    0 1px 2px var(--shadow-warm),
+    inset 0 1px 0 rgba(3, 255, 40, 0.03);
+}
+
+.neon .ink-wash-elevated {
+  box-shadow:
+    0 4px 20px var(--shadow-deep),
+    inset 0 1px 0 rgba(3, 255, 40, 0.04);
+}
+
+.neon ::selection {
+  background: rgba(3, 255, 40, 0.15);
+  color: var(--ink);
+}
+
+.neon .seal-badge {
+  background: var(--vermillion);
+  color: #0d0d0d;
+}
+
+.neon .badge-success {
+  background: var(--moss-dim);
+  color: var(--moss);
+  border: 1px solid rgba(3, 255, 40, 0.2);
+}
+
+.neon .badge-error {
+  background: var(--vermillion-dim);
+  color: var(--vermillion);
+  border: 1px solid rgba(3, 255, 40, 0.2);
+}
+
+.neon .badge-warning {
+  background: var(--ochre-dim);
+  color: var(--ochre);
+  border: 1px solid rgba(3, 255, 40, 0.2);
+}
+
+/* ============================================
+   SETTINGS PANEL — theme-aware styles
+   ============================================ */
+.settings-panel {
+  box-shadow: -4px 0 30px var(--shadow-warm), inset 1px 0 0 rgba(255,255,255,0.3);
+}
+
+.neon .settings-panel {
+  box-shadow: -4px 0 30px rgba(3, 255, 40, 0.05), inset 1px 0 0 rgba(3, 255, 40, 0.03);
+}
+
+.settings-panel-texture {
+  background-image: radial-gradient(circle at 20% 30%, rgba(106,90,58,0.3) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(196,57,45,0.1) 0%, transparent 40%);
+}
+
+.neon .settings-panel-texture {
+  background-image: radial-gradient(circle at 20% 30%, rgba(3,255,40,0.15) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(3,255,40,0.08) 0%, transparent 40%);
+}
+
+/* ============================================
    SELECTION STYLE
    ============================================ */
 ::selection {

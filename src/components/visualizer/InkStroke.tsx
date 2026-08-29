@@ -8,7 +8,7 @@ interface InkStrokeProps {
   audioData?: Uint8Array;
   volume?: number;
   className?: string;
-  theme?: "light" | "dark" | "system";
+  theme?: "paper" | "neon" | "system";
 }
 
 // ============================================
@@ -50,7 +50,7 @@ function warpedNoise(x: number, time: number, warp: number = 0.3): number {
 // INK STROKE RENDERER
 // ============================================
 
-export default function InkStroke({ status, audioData, volume = 0, className = "", theme = "light" }: InkStrokeProps) {
+export default function InkStroke({ status, audioData, volume = 0, className = "", theme = "paper" }: InkStrokeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -61,11 +61,12 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
 
   const isIdle = status === "idle" || status === "disconnected";
   const isTransitioning = prevStatusRef.current !== status;
-  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark = theme === "neon" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isNeon = theme === "neon";
 
-  // Ink colors: dark mode = light cream ink, light mode = dark ink
-  const inkColor: [number, number, number] = isDark ? [232, 223, 208] : [26, 26, 26];
-  const ochreColor: [number, number, number] = isDark ? [160, 138, 90] : [106, 90, 58];
+  // Ink colors per theme
+  const inkColor: [number, number, number] = isNeon ? [3, 255, 40] : isDark ? [232, 223, 208] : [26, 26, 26];
+  const ochreColor: [number, number, number] = isNeon ? [3, 255, 40] : isDark ? [160, 138, 90] : [106, 90, 58];
 
   const getConfig = useCallback(() => {
     switch (status) {
@@ -311,6 +312,32 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
       ctx.fill();
 
       // ============================================
+      // LAYER 2b: NEON GLOW — outer glow for neon theme
+      // ============================================
+      if (isNeon && (status === "speaking" || status === "listening")) {
+        ctx.save();
+        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${config.opacity * eased * 0.3})`;
+        ctx.lineWidth = config.baseWidth * 0.5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        for (let i = 0; i <= segments; i++) {
+          const x = (i / segments) * w;
+          const nx = i / segments;
+          const warp1 = warpedNoise(nx * 2 + time, time, config.irregularity * 0.5);
+          const warp2 = warpedNoise(nx * 4 + time * 0.7, time * 0.8, config.irregularity * 0.3);
+          const taper = Math.pow(Math.sin(nx * Math.PI), 1.5);
+          const yOffset = ((warp1 - 0.5) * 0.6 + (warp2 - 0.5) * 0.4) * totalAmplitude * 2 * taper;
+          const y = midY + yOffset;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // ============================================
       // LAYER 3: INK POOLING — accumulation at low points
       // ============================================
       for (let i = 0; i < segments; i += 3) {
@@ -429,9 +456,11 @@ export default function InkStroke({ status, audioData, volume = 0, className = "
         <span
           className="font-mono text-[9px] uppercase tracking-[0.2em] select-none transition-all duration-1000"
           style={{
-            color: isDark
-              ? (status === "idle" ? "rgba(232,223,208,0.15)" : "rgba(232,223,208,0.3)")
-              : (status === "idle" ? "rgba(26,26,26,0.15)" : "rgba(26,26,26,0.3)"),
+            color: isNeon
+              ? (status === "idle" ? "rgba(3,255,40,0.15)" : "rgba(3,255,40,0.5)")
+              : isDark
+                ? (status === "idle" ? "rgba(232,223,208,0.15)" : "rgba(232,223,208,0.3)")
+                : (status === "idle" ? "rgba(26,26,26,0.15)" : "rgba(26,26,26,0.3)"),
             opacity: status === "idle" ? 0.5 : 1,
           }}
         >

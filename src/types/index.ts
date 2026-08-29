@@ -27,7 +27,7 @@ export interface Settings {
   providers: ProviderConfig[];
   temperature: number;
   maxTokens: number;
-  theme: "light" | "dark" | "system";
+  theme: "paper" | "neon" | "system";
 }
 
 export interface ModelOption {

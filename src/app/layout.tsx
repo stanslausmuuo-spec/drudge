@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#e8dfd0" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1a1a" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0d0d" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -53,7 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-paper font-sans">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem themes={["paper", "neon", "system"]}>
           {children}
         </ThemeProvider>
       </body>

@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   providers: [],
   temperature: 0.7,
   maxTokens: 4096,
-  theme: "system",
+  theme: "paper",
 };
 
 export default function Home() {
@@ -203,8 +203,11 @@ export default function Home() {
           {/* Ambient grain */}
           <div className="absolute inset-0 animate-ink-diffuse opacity-[0.03]"
             style={{
-              backgroundImage: `radial-gradient(ellipse at 30% 40%, rgba(106,90,58,0.08) 0%, transparent 50%),
-                               radial-gradient(ellipse at 70% 60%, rgba(196,57,45,0.04) 0%, transparent 50%)`,
+              backgroundImage: settings.theme === "neon"
+                ? `radial-gradient(ellipse at 30% 40%, rgba(3,255,40,0.08) 0%, transparent 50%),
+                   radial-gradient(ellipse at 70% 60%, rgba(3,255,40,0.04) 0%, transparent 50%)`
+                : `radial-gradient(ellipse at 30% 40%, rgba(106,90,58,0.08) 0%, transparent 50%),
+                   radial-gradient(ellipse at 70% 60%, rgba(196,57,45,0.04) 0%, transparent 50%)`,
             }}
           />
 

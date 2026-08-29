@@ -59,14 +59,14 @@ export default function ApiKeyInput({
 
   if (provider === "ollama") {
     return (
-      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+      <div className="rounded-xl border border-ink-wash bg-ink-wash p-4">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <span className="text-xs font-mono text-emerald-400">{info.icon}</span>
+          <div className="w-8 h-8 rounded-lg bg-moss-dim border border-moss/20 flex items-center justify-center">
+            <span className="text-xs font-mono text-moss">{info.icon}</span>
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-medium text-slate-200">{info.name}</h4>
-            <p className="text-[10px] font-mono text-slate-500">Runs locally, no API key needed</p>
+            <h4 className="text-sm font-medium text-ink-light">{info.name}</h4>
+            <p className="text-[10px] font-mono text-ink-muted">Runs locally, no API key needed</p>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full badge-success">
             Always available
@@ -77,14 +77,14 @@ export default function ApiKeyInput({
   }
 
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 space-y-3">
+    <div className="rounded-xl border border-ink-wash bg-ink-wash p-4 space-y-3">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-          <span className="text-xs font-mono text-blue-400">{info.icon}</span>
+        <div className="w-8 h-8 rounded-lg bg-vermillion-dim border border-vermillion/20 flex items-center justify-center">
+          <span className="text-xs font-mono text-vermillion">{info.icon}</span>
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-medium text-slate-200">{info.name}</h4>
-          <p className="text-[10px] font-mono text-slate-500">
+          <h4 className="text-sm font-medium text-ink-light">{info.name}</h4>
+          <p className="text-[10px] font-mono text-ink-muted">
             {connected ? "Connected" : "Not configured"}
           </p>
         </div>
@@ -101,13 +101,13 @@ export default function ApiKeyInput({
           value={apiKey}
           onChange={(e) => onUpdateKey(provider, e.target.value)}
           placeholder={info.placeholder}
-          className="w-full glass-input text-sm font-mono pr-20 placeholder:text-slate-600"
+          className="w-full ink-input text-sm font-mono pr-20 placeholder:text-ink-faint"
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
           <button
             type="button"
             onClick={() => setShowKey(!showKey)}
-            className="p-1.5 rounded-md text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-colors"
+            className="p-1.5 rounded-md text-ink-muted hover:text-ink-light hover:bg-ink-wash transition-colors"
             title={showKey ? "Hide key" : "Show key"}
           >
             {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -116,10 +116,10 @@ export default function ApiKeyInput({
             type="button"
             onClick={handleCopy}
             disabled={!apiKey}
-            className="p-1.5 rounded-md text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-colors disabled:opacity-30"
+            className="p-1.5 rounded-md text-ink-muted hover:text-ink-light hover:bg-ink-wash transition-colors disabled:opacity-30"
             title="Copy key"
           >
-            {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+            {copied ? <Check size={14} className="text-moss" /> : <Copy size={14} />}
           </button>
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function ApiKeyInput({
             type="button"
             onClick={handleTest}
             disabled={!apiKey || testing}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-white/5 transition-colors disabled:opacity-30"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono text-ink-muted hover:text-ink-light hover:bg-ink-wash border border-ink-wash transition-colors disabled:opacity-30"
           >
             <Zap size={12} className={testing ? "animate-pulse" : ""} />
             {testing ? "Testing..." : "Test Connection"}
@@ -139,7 +139,7 @@ export default function ApiKeyInput({
             <button
               type="button"
               onClick={() => onRemoveKey(provider)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono text-slate-500 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono text-ink-muted hover:text-vermillion hover:bg-vermillion-dim transition-colors"
             >
               <Trash2 size={12} />
               Remove
@@ -147,7 +147,7 @@ export default function ApiKeyInput({
           )}
         </div>
         {connected && lastUsed && (
-          <span className="text-[10px] font-mono text-slate-600">
+          <span className="text-[10px] font-mono text-ink-faint">
             Last used: {formatLastUsed(lastUsed)}
           </span>
         )}

@@ -4,8 +4,8 @@
   "description": "Privacy-first voice-enabled personal AI assistant",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e8dfd0",
-  "theme_color": "#e8dfd0",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
   "orientation": "any",
   "icons": [
     {
