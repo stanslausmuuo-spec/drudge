@@ -14,6 +14,7 @@ import {
   saveStoredSettings,
 } from "@/lib/storage/localStorage";
 import { useAmbientSound } from "@/lib/audio/useAmbientSound";
+import { speakText } from "@/lib/audio/useBrowserSpeech";
 import { Settings } from "@/types";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -153,6 +154,7 @@ export default function Home() {
           addMessage("assistant", data.reply);
           if (settings.autoSpeak) {
             playInkStroke();
+            speakText(data.reply, settings.speechRate, settings.speechPitch);
           }
         }
       }
