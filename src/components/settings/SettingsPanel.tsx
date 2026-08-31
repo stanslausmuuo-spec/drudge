@@ -319,6 +319,52 @@ export default function SettingsPanel({
                   />
                 </button>
               </div>
+
+              {/* Speech Rate */}
+              <section className="pt-4 border-t border-ink-wash">
+                <div className="flex items-baseline justify-between mb-3">
+                  <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-ink-faint">
+                    Speech Rate
+                  </label>
+                  <span className="font-serif text-sm text-ink/50 italic">
+                    {settings.speechRate}x
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.1"
+                  value={settings.speechRate}
+                  onChange={(e) =>
+                    onUpdateSettings({ ...settings, speechRate: parseFloat(e.target.value) })
+                  }
+                  className="w-full accent-ink"
+                />
+              </section>
+
+              {/* Speech Pitch */}
+              <section>
+                <div className="flex items-baseline justify-between mb-3">
+                  <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-ink-faint">
+                    Speech Pitch
+                  </label>
+                  <span className="font-serif text-sm text-ink/50 italic">
+                    {settings.speechPitch}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="1.5"
+                  step="0.1"
+                  value={settings.speechPitch}
+                  onChange={(e) =>
+                    onUpdateSettings({ ...settings, speechPitch: parseFloat(e.target.value) })
+                  }
+                  className="w-full accent-ink"
+                />
+              </section>
             </div>
           )}
 
