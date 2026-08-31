@@ -11,7 +11,7 @@ interface SettingsPanelProps {
   onClose: () => void;
 }
 
-type TabType = "general" | "ai" | "voice" | "about";
+type TabType = "general" | "ai" | "voice" | "plugins" | "about";
 
 export default function SettingsPanel({
   settings,
@@ -95,6 +95,7 @@ export default function SettingsPanel({
               ["general", "General"],
               ["ai", "AI Models"],
               ["voice", "Voice"],
+              ["plugins", "Plugins"],
               ["about", "About"],
             ] as const
           ).map(([tab, label]) => (
@@ -175,10 +176,11 @@ export default function SettingsPanel({
                     <option value="mistral">Mistral</option>
                     <option value="phi3">Phi-3</option>
                   </optgroup>
-                  <optgroup label="OpenAI">
-                    <option value="gpt-4o">GPT-4o</option>
-                    <option value="gpt-4o-mini">GPT-4o Mini</option>
-                  </optgroup>
+                   <optgroup label="OpenAI">
+                     <option value="gpt-4o-realtime-preview">GPT-4o Realtime (Native Voice)</option>
+                     <option value="gpt-4o">GPT-4o</option>
+                     <option value="gpt-4o-mini">GPT-4o Mini</option>
+                   </optgroup>
                   <optgroup label="Anthropic">
                     <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
                     <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
@@ -316,6 +318,28 @@ export default function SettingsPanel({
                     }`}
                   />
                 </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "plugins" && (
+            <div className="space-y-4 animate-slide-up">
+              <div className="p-4 rounded-xl border border-ink-wash bg-ink-wash/50 space-y-2">
+                <h4 className="font-serif text-sm font-medium text-ink">Plugin Manager (Mark-LI)</h4>
+                <p className="text-xs text-ink/70 font-serif leading-relaxed">
+                  Drop custom Python plugins into <code className="font-mono text-[10px]">agent/plugins/</code> to extend Jarvis with new skills dynamically.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-ink-wash bg-paper">
+                  <div>
+                    <p className="font-serif text-sm text-ink">sample_plugin</p>
+                    <p className="font-mono text-[10px] text-ink-faint">v1.0.0 · Active & Loaded</p>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase px-2 py-1 rounded bg-ink/10 text-ink">
+                    Enabled
+                  </span>
+                </div>
               </div>
             </div>
           )}

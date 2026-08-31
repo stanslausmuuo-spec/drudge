@@ -18,7 +18,9 @@ export async function POST(req: NextRequest) {
 
     if (process.env.NODE_ENV === "production" && (LIVEKIT_API_KEY === "devkey" || LIVEKIT_URL.includes("localhost"))) {
       return NextResponse.json(
-        { error: "LiveKit is not configured for production. Please set LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL environment variables in Vercel." },
+        { 
+          error: "LiveKit is not configured for production. Please set valid LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL (wss://...) environment variables in Vercel dashboard." 
+        },
         { status: 500 }
       );
     }
@@ -46,9 +48,9 @@ export async function POST(req: NextRequest) {
       url: LIVEKIT_URL,
     });
   } catch (error) {
-    console.error("Error generating token:", error);
+    console.error("Error generating LiveKit connection token for Vercel deployment:", error);
     return NextResponse.json(
-      { error: "Failed to generate connection details" },
+      { error: "Failed to generate connection details in production" },
       { status: 500 }
     );
   }
