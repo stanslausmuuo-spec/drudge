@@ -303,18 +303,18 @@ export default function SettingsPanel({
                   <p className="text-[10px] text-ink-faint font-mono">Play responses as speech</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => onUpdateSettings({ ...settings, autoSpeak: !settings.autoSpeak })}
-                  className={`ink-press relative w-10 h-[18px] rounded-full transition-all duration-500 ${
-                    settings.autoSpeak ? "bg-ink/60" : "bg-ink-wash-strong"
+                  className={`ink-press relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ink/40 ${
+                    settings.autoSpeak ? "bg-ink" : "bg-ink-faint/40"
                   }`}
                   role="switch"
                   aria-checked={settings.autoSpeak}
                 >
                   <span
-                    className={`absolute top-[2px] left-[2px] w-[14px] h-[14px] rounded-full bg-paper transition-all duration-500 shadow-sm ${
-                      settings.autoSpeak
-                        ? "translate-x-[22px] scale-100"
-                        : "translate-x-0 scale-90"
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-paper shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      settings.autoSpeak ? "translate-x-5" : "translate-x-0"
                     }`}
                   />
                 </button>
