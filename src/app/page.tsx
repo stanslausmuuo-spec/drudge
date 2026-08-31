@@ -457,6 +457,12 @@ export default function Home() {
               className="flex-1 bg-transparent border-none outline-none text-ink placeholder-ink-faint/40 text-[15px] font-serif disabled:cursor-not-allowed disabled:opacity-30"
             />
 
+            {input.trim() && (
+              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-ink/10 font-mono text-[10px] text-ink/60 animate-fade-in select-none">
+                ↵
+              </span>
+            )}
+
             {/* Send */}
             <button
               onClick={() => { handleSendMessage(); playKeyClick(); }}

@@ -325,7 +325,7 @@ export default function SettingsPanel({
           {activeTab === "plugins" && (
             <div className="space-y-4 animate-slide-up">
               <div className="p-4 rounded-xl border border-ink-wash bg-ink-wash/50 space-y-2">
-                <h4 className="font-serif text-sm font-medium text-ink">Plugin Manager (Mark-LI)</h4>
+                <h4 className="font-serif text-sm font-medium text-ink">Plugin Manager</h4>
                 <p className="text-xs text-ink/70 font-serif leading-relaxed">
                   Drop custom Python plugins into <code className="font-mono text-[10px]">agent/plugins/</code> to extend Jarvis with new skills dynamically.
                 </p>

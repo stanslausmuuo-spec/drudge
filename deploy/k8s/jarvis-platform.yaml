@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jarvis-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jarvis-config
+  namespace: jarvis-system
+data:
+  LIVEKIT_URL: "ws://livekit-server:7880"
+  OLLAMA_BASE_URL: "http://ollama:11434"
+  WHISPER_URL: "http://whisper:9000"
+  PIPER_URL: "http://piper-tts:5000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livekit-server
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: livekit-server
+  template:
+    metadata:
+      labels:
+        app: livekit-server
+    spec:
+      containers:
+        - name: livekit-server
+          image: livekit/livekit-server:v1.8.2
+          args: ["--dev", "--bind", "0.0.0.0", "--redis-port", "6379"]
+          ports:
+            - containerPort: 7880
+            - containerPort: 7881
+          resources:
+            limits:
+              cpu: "2.0"
+              memory: 2Gi
+            requests:
+              cpu: "500m"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: livekit-server
+  namespace: jarvis-system
+spec:
+  ports:
+    - port: 7880
+      targetPort: 7880
+      name: http
+    - port: 7881
+      targetPort: 7881
+      name: rtc
+  selector:
+    app: livekit-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:0.5.7
+          ports:
+            - containerPort: 11434
+          resources:
+            limits:
+              cpu: "4.0"
+              memory: 8Gi
+            requests:
+              cpu: "1.0"
+              memory: 2Gi
+          volumeMounts:
+            - mountPath: /root/.ollama
+              name: ollama-storage
+      volumes:
+        - name: ollama-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: jarvis-system
+spec:
+  ports:
+    - port: 11434
+      targetPort: 11434
+  selector:
+    app: ollama
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jarvis-agent
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jarvis-agent
+  template:
+    metadata:
+      labels:
+        app: jarvis-agent
+    spec:
+      containers:
+        - name: jarvis-agent
+          image: jarvis-agent:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jarvis-config
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: 1Gi
+            requests:
+              cpu: "250m"
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-frontend
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextjs-frontend
+  template:
+    metadata:
+      labels:
+        app: nextjs-frontend
+    spec:
+      containers:
+        - name: nextjs
+          image: jarvis-frontend:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jarvis-config
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: 1Gi
+            requests:
+              cpu: "250m"
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextjs-frontend
+  namespace: jarvis-system
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: nextjs-frontend

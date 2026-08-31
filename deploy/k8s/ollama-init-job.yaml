@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-model-init
+  namespace: jarvis-system
+spec:
+  template:
+    spec:
+      containers:
+        - name: model-puller
+          image: curlimages/curl:latest
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for Ollama service to start..."
+              until curl -s http://ollama:11434/api/tags > /dev/null; do
+                sleep 3
+              done
+              echo "Pulling llama3.1 model into Ollama..."
+              curl -X POST http://ollama:11434/api/pull -d '{"name": "llama3.1"}'
+              echo "Model initialization complete."
+      restartPolicy: OnFailure
+  backoffLimit: 5

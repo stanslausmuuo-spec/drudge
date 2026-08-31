@@ -3,8 +3,21 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Jarvis",
-  description: "Privacy-first voice-enabled personal AI assistant",
+  title: "Jarvis — Privacy-First Voice & Vision AI Assistant",
+  description: "An advanced, highly intelligent, privacy-first personal AI assistant and vision companion powered by LiveKit, Ollama, and local speech models.",
+  keywords: ["AI Assistant", "Privacy-First AI", "LiveKit", "Ollama", "Local LLM", "Voice AI", "Vision AI"],
+  authors: [{ name: "Jarvis AI" }],
+  openGraph: {
+    title: "Jarvis — Privacy-First Voice & Vision AI Assistant",
+    description: "An advanced, highly intelligent, privacy-first personal AI assistant and vision companion.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jarvis — Privacy-First Voice & Vision AI Assistant",
+    description: "An advanced, highly intelligent, privacy-first personal AI assistant and vision companion.",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

@@ -1,5 +1,5 @@
 """
-Jarvis Voice Agent — Production-Grade Mark-LI Enhanced Architecture
+Jarvis Voice Agent — Production-Grade Enhanced Architecture
 Powered by LiveKit Agents, OpenAI Realtime / Ollama / Cloud LLMs,
 Mem0 Persistent Memory, Dynamic Plugins, and Advanced Action Suite.
 """
@@ -43,15 +43,16 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 WHISPER_URL = os.getenv("WHISPER_URL", "http://localhost:9000")
 PIPER_URL = os.getenv("PIPER_URL", "http://localhost:5000")
 
-JARVIS_SYSTEM_PROMPT = """You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant and vision companion (Mark-LI architecture).
+JARVIS_SYSTEM_PROMPT = """You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant and vision companion.
 You speak with calm confidence, precision, and a touch of dry wit — like Tony Stark's JARVIS.
 You are concise and direct. You answer questions accurately, inspect visual video feeds when available, and offer proactive suggestions."""
 
 
 class JarvisTools(llm.FunctionContext):
-    def __init__(self, plugins=None):
+    def __init__(self, plugins=None, memory=None):
         super().__init__()
         self.plugins = plugins or {}
+        self.memory = memory
 
     @llm.ai_function(description="Read the contents of a local file in the project workspace")
     async def read_project_file(
@@ -77,6 +78,13 @@ class JarvisTools(llm.FunctionContext):
         level: llm.TypeInfo(description="Volume level percentage") = 50,
     ):
         return adjust_volume(level)
+
+    @llm.ai_function(description="Recall long-term user memories, preferences, and context")
+    async def recall_memories(self):
+        if self.memory:
+            mems = await self.memory.get_memories(user_id="Boss")
+            return {"memories": mems}
+        return {"memories": ["No active memory manager available."]}
 
 
 def prewarm(proc: JobProcess):
@@ -172,7 +180,7 @@ async def entrypoint(ctx: JobContext):
         api_key = os.getenv("OPENAI_API_KEY")
 
     plugins = ctx.proc.userData.get("plugins", {})
-    fnc_ctx = JarvisTools(plugins=plugins)
+    fnc_ctx = JarvisTools(plugins=plugins, memory=memory)
 
     if provider_type == "realtime" and api_key:
         logger.info("Using OpenAI Realtime Model for ultra-low latency voice")
@@ -181,7 +189,13 @@ async def entrypoint(ctx: JobContext):
         agent = Agent(
             instructions=JARVIS_SYSTEM_PROMPT,
             llm=llm_plugin,
-            tools=[fnc_ctx.read_project_file, fnc_ctx.get_system_stats, fnc_ctx.search_web, fnc_ctx.set_volume],
+            tools=[
+                fnc_ctx.read_project_file,
+                fnc_ctx.get_system_stats,
+                fnc_ctx.search_web,
+                fnc_ctx.set_volume,
+                fnc_ctx.recall_memories,
+            ],
             chat_ctx=initial_ctx,
         )
     else:
@@ -240,10 +254,22 @@ async def entrypoint(ctx: JobContext):
         ),
     )
 
+    @ctx.room.on("data_received")
+    def on_data_received(payload: bytes, participant, kind, *args, **kwargs):
+        try:
+            data = json.loads(payload.decode("utf-8"))
+            if data.get("type") == "user_message":
+                user_text = data.get("text")
+                logger.info("Received user message via data channel: %s", user_text)
+                import asyncio
+                asyncio.create_task(session.generate_reply(instructions=f"The user typed this message in chat: {user_text}"))
+        except Exception as e:
+            logger.error("Error processing incoming data channel message: %s", e)
+
     await ctx.connect()
 
     await session.generate_reply(
-        instructions="Greet the user briefly. Introduce yourself as Jarvis (Production-Grade Mark-LI) and mention you are ready for voice and video assistance."
+        instructions="Greet the user briefly. Introduce yourself as Jarvis and mention you are ready for voice and video assistance."
     )
 
     logger.info("Jarvis agent session started successfully")

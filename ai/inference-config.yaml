@@ -1,0 +1,59 @@
+# Jarvis Enterprise AI Platform Inference Configuration
+version: "1.0.0"
+platform: "Jarvis AI Platform (JAI-OS)"
+
+providers:
+  ollama:
+    base_url: "http://localhost:11434"
+    timeout: 30s
+    default_model: "llama3.1"
+    supported_models:
+      - name: "llama3.1"
+        context_window: 128000
+        quantization: "Q4_K_M"
+        recommended_gpu_vram: "6GB"
+      - name: "gemma2"
+        context_window: 8192
+        quantization: "Q4_K_M"
+        recommended_gpu_vram: "6GB"
+      - name: "mistral"
+        context_window: 32768
+        quantization: "Q4_K_M"
+        recommended_gpu_vram: "6GB"
+      - name: "phi3"
+        context_window: 128000
+        quantization: "Q4_K_M"
+        recommended_gpu_vram: "4GB"
+
+  openai:
+    api_base: "https://api.openai.com/v1"
+    supported_models:
+      - "gpt-4o-realtime-preview"
+      - "gpt-4o"
+      - "gpt-4o-mini"
+
+  anthropic:
+    api_base: "https://api.anthropic.com/v1"
+    supported_models:
+      - "claude-sonnet-4-20250514"
+      - "claude-3-5-haiku-20241022"
+
+  google:
+    api_base: "https://generativelanguage.googleapis.com/v1beta/openai/"
+    supported_models:
+      - "gemini-2.0-flash"
+
+speech_services:
+  stt:
+    provider: "whisper"
+    endpoint: "http://localhost:9000/v1"
+    model: "whisper-1"
+  tts:
+    provider: "piper"
+    endpoint: "http://localhost:5000/v1"
+    model: "en_US-lessac-medium.onnx"
+
+memory_architecture:
+  store: "Mem0 + Local JSON fallback"
+  embedding_model: "text-embedding-3-small"
+  vector_db: "In-memory / PGVector"

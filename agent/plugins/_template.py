@@ -1,5 +1,5 @@
 """
-Plugin Template for Jarvis (Mark-LI architecture)
+Plugin Template for Jarvis
 Drop any .py file implementing this structure into the plugins/ directory.
 """
 
@@ -7,7 +7,7 @@ PLUGIN = {
     "name": "sample_plugin",
     "version": "1.0.0",
     "description": "Template plugin description",
-    "author": "FatihMakes / Jarvis",
+    "author": "Jarvis",
     "enabled": True,
 }
 
