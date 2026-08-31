@@ -26,8 +26,8 @@ const DEFAULT_SETTINGS: Settings = {
   autoSpeak: true,
   sttProvider: "whisper",
   ttsProvider: "piper",
-  ollamaModel: "llama3.1",
-  defaultProvider: "ollama",
+  model: "gemini-2.0-flash",
+  defaultProvider: "google",
   providers: [],
   temperature: 0.7,
   maxTokens: 4096,
@@ -143,7 +143,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: "user", content: textToSend }],
-          model: settings.ollamaModel,
+          model: settings.model,
           providers: settings.providers,
           systemPrompt: settings.systemPrompt,
         }),
@@ -507,7 +507,7 @@ export default function Home() {
 
           <div className="flex items-center justify-center mt-4">
             <span className="font-mono text-[9px] text-ink/40 uppercase tracking-[0.2em]">
-              jarvis · {settings.ollamaModel}
+              jarvis · {settings.model}
             </span>
           </div>
         </div>

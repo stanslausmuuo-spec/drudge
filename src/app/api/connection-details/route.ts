@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity: participantName,
       attributes: {
-        model: model || "llama3.1",
+        model: model || "gemini-2.0-flash",
         providers: JSON.stringify(providers || []),
       },
     });

@@ -18,7 +18,6 @@ const PROVIDER_INFO: Record<AIProvider, { name: string; icon: string; placeholde
   openai: { name: "OpenAI", icon: "O", placeholder: "sk-..." },
   anthropic: { name: "Anthropic", icon: "A", placeholder: "sk-ant-..." },
   google: { name: "Google AI", icon: "G", placeholder: "AI..." },
-  ollama: { name: "Ollama (Local)", icon: "L", placeholder: "No key needed" },
 };
 
 export default function ApiKeyInput({
@@ -56,25 +55,6 @@ export default function ApiKeyInput({
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     return `${Math.floor(diff / 86400000)}d ago`;
   };
-
-  if (provider === "ollama") {
-    return (
-      <div className="rounded-xl border border-ink-wash bg-ink-wash p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-moss-dim border border-moss/20 flex items-center justify-center">
-            <span className="text-xs font-mono text-moss">{info.icon}</span>
-          </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-medium text-ink-light">{info.name}</h4>
-            <p className="text-[10px] font-mono text-ink-muted">Runs locally, no API key needed</p>
-          </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full badge-success">
-            Always available
-          </span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="rounded-xl border border-ink-wash bg-ink-wash p-4 space-y-3">

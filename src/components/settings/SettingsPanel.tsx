@@ -164,18 +164,12 @@ export default function SettingsPanel({
                   Model
                 </label>
                 <select
-                  value={settings.ollamaModel}
+                  value={settings.model}
                   onChange={(e) =>
-                    onUpdateSettings({ ...settings, ollamaModel: e.target.value })
+                    onUpdateSettings({ ...settings, model: e.target.value })
                   }
                   className="w-full bg-transparent border-b border-ink-wash-strong pb-2 text-ink text-sm font-serif outline-none appearance-none cursor-pointer hover:border-ink-light transition-colors"
                 >
-                  <optgroup label="Local">
-                    <option value="llama3.1">Llama 3.1</option>
-                    <option value="gemma2">Gemma 2</option>
-                    <option value="mistral">Mistral</option>
-                    <option value="phi3">Phi-3</option>
-                  </optgroup>
                    <optgroup label="OpenAI">
                      <option value="gpt-4o-realtime-preview">GPT-4o Realtime (Native Voice)</option>
                      <option value="gpt-4o">GPT-4o</option>
@@ -242,9 +236,9 @@ export default function SettingsPanel({
           {activeTab === "ai" && (
             <div className="space-y-4 animate-slide-up">
               <p className="text-xs text-ink/70 font-serif mb-4">
-                Paste your API keys here to use cloud models (OpenAI, Anthropic, Google) alongside local Ollama.
+                Paste your API keys here to connect cloud AI models (OpenAI, Anthropic, Google).
               </p>
-              {(["openai", "anthropic", "google", "ollama"] as AIProvider[]).map((prov) => {
+              {(["openai", "anthropic", "google"] as AIProvider[]).map((prov) => {
                 const conf = getProviderConfig(prov);
                 return (
                   <ApiKeyInput

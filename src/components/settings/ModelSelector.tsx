@@ -15,14 +15,12 @@ const PROVIDER_LABELS: Record<AIProvider, string> = {
   openai: "OpenAI",
   anthropic: "Anthropic",
   google: "Google AI",
-  ollama: "Local (Ollama)",
 };
 
 const PROVIDER_COLORS: Record<AIProvider, string> = {
   openai: "text-vermillion",
   anthropic: "text-ink-muted",
   google: "text-ochre",
-  ollama: "text-moss",
 };
 
 export default function ModelSelector({
