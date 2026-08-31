@@ -55,6 +55,7 @@ export default function Home() {
     toggleMicrophone,
     toggleCamera,
     cameraEnabled,
+    addMessage,
   } = useLiveKitSession();
 
   const { playInkStroke, playKeyClick } = useAmbientSound();
@@ -128,11 +129,37 @@ export default function Home() {
     }
   }, [agentStatus]);
 
-  const handleSendMessage = useCallback(() => {
+  const handleSendMessage = useCallback(async () => {
     if (!input.trim() || connectionState.status !== "connected") return;
-    sendMessage(input);
+    const textToSend = input;
     setInput("");
-  }, [input, sendMessage, connectionState.status]);
+    
+    sendMessage(textToSend);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: "user", content: textToSend }],
+          model: settings.ollamaModel,
+          providers: settings.providers,
+          systemPrompt: settings.systemPrompt,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          addMessage("assistant", data.reply);
+          if (settings.autoSpeak) {
+            playInkStroke();
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Direct chat API fallback error:", err);
+    }
+  }, [input, connectionState.status, sendMessage, messages, settings, addMessage, playInkStroke]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
