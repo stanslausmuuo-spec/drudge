@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useTheme } from "next-themes";
 import InkStroke from "@/components/visualizer/InkStroke";
+import JarvisHologram from "@/components/visualizer/JarvisHologram";
 import KineticText from "@/components/chat/KineticText";
 import ActivityPanel, { ActivityStep } from "@/components/activity/ActivityPanel";
 import SettingsPanel from "@/components/settings/SettingsPanel";
@@ -257,25 +258,51 @@ export default function Home() {
 
       {/* REAL-TIME VIDEO CALL */}
       {cameraEnabled && (
-        <div className="fixed inset-0 z-40 bg-paper animate-fade-in">
+        <div className="fixed inset-0 z-40 bg-paper animate-fade-in overflow-hidden">
           <div className="topo-lines absolute inset-0" aria-hidden="true" />
 
-          {/* Main local camera feed */}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover transform -scale-x-100"
-          />
+          {/* Main JARVIS hologram (agent presence) */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-[380px] h-[380px] max-w-[80vw] max-h-[80vw] sm:w-[420px] sm:h-[420px]">
+              <JarvisHologram status={agentStatus} />
+            </div>
+          </div>
 
-          {/* Remote agent video (PiP) */}
+          {/* Agent status label under hologram */}
+          <div className="absolute bottom-16 left-0 right-0 z-[45] flex justify-center">
+            <span className="px-4 py-2 rounded-full bg-ink/70 text-paper text-xs font-mono uppercase tracking-wider backdrop-blur-sm">
+              {agentStatus === "speaking"
+                ? "Jarvis is speaking"
+                : agentStatus === "listening"
+                ? "Listening..."
+                : agentStatus === "thinking"
+                ? "Processing..."
+                : "Jarvis is watching"}
+            </span>
+          </div>
+
+          {/* Local camera feed (PiP) */}
+          <div className="absolute bottom-8 left-8 z-[45] w-52 h-36 rounded-xl overflow-hidden shadow-2xl border border-ink-wash-strong bg-black">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover transform -scale-x-100"
+            />
+            <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-ink/60 text-[9px] font-mono text-paper uppercase tracking-wider">
+              You
+            </div>
+          </div>
+
+          {/* Remote agent video (fallback, if agent publishes real video) */}
           {remoteVideo && (
-            <div className="absolute top-16 right-8 z-[45] w-52 h-40 bg-ink-wash border border-ink-wash-strong rounded-xl overflow-hidden shadow-2xl">
+            <div className="absolute top-16 right-8 z-[45] w-52 h-40 rounded-xl overflow-hidden shadow-2xl border border-ink-wash-strong bg-black">
               <div
                 ref={(node) => {
                   if (node && !node.querySelector("video")) {
                     node.appendChild(remoteVideo);
+                    node.querySelector("video")?.classList.add("w-full", "h-full", "object-contain");
                   }
                 }}
                 className="w-full h-full bg-black"
@@ -294,14 +321,39 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Status / speaking indicator */}
-          {!remoteVideo && (
-            <div className="absolute bottom-8 left-0 right-0 z-[45] flex justify-center">
-              <span className="px-4 py-2 rounded-full bg-ink/70 text-paper text-xs font-mono uppercase tracking-wider">
-                {agentStatus === "speaking" ? "Jarvis is speaking" : agentStatus === "listening" ? "Listening..." : "Jarvis is watching"}
-              </span>
-            </div>
-          )}
+          {/* Call controls */}
+          <div className="absolute bottom-8 right-8 z-[45] flex items-center gap-2">
+            <button
+              onClick={() => { handleToggleMic(); playKeyClick(); }}
+              className="w-11 h-11 rounded-full flex items-center justify-center bg-ink/60 hover:bg-ink/80 text-paper transition-colors"
+              aria-label="Toggle microphone"
+            >
+              {micEnabled ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" y1="19" x2="12" y2="23" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
+                  <line x1="12" y1="19" x2="12" y2="23" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => { toggleCamera(); playKeyClick(); }}
+              className="w-11 h-11 rounded-full flex items-center justify-center bg-ochre hover:bg-ochre-dim text-ink transition-colors"
+              aria-label="End video call"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 7l-7 5 7 5V7z" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
