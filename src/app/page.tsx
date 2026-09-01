@@ -131,11 +131,15 @@ export default function Home() {
   }, [agentStatus]);
 
   const handleSendMessage = useCallback(async () => {
-    if (!input.trim() || connectionState.status !== "connected") return;
+    if (!input.trim()) return;
     const textToSend = input;
     setInput("");
     
-    sendMessage(textToSend);
+    addMessage("user", textToSend);
+
+    if (connectionState.status === "connected") {
+      sendMessage(textToSend);
+    }
 
     try {
       const res = await fetch("/api/chat", {
@@ -157,9 +161,13 @@ export default function Home() {
             speakText(data.reply, settings.speechRate, settings.speechPitch);
           }
         }
+      } else {
+        const errData = await res.json();
+        addMessage("assistant", `Error: ${errData.error || "Please configure your API key in Settings."}`);
       }
     } catch (err) {
       console.warn("Direct chat API fallback error:", err);
+      addMessage("assistant", "Network error communicating with AI provider.");
     }
   }, [input, connectionState.status, sendMessage, messages, settings, addMessage, playInkStroke]);
 
@@ -481,9 +489,8 @@ export default function Home() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isConnected ? "Ask or share what you see..." : ""}
-              disabled={!isConnected}
-              className="flex-1 bg-transparent border-none outline-none text-ink placeholder-ink-faint/40 text-[15px] font-serif disabled:cursor-not-allowed disabled:opacity-30"
+              placeholder="Ask Jarvis..."
+              className="flex-1 bg-transparent border-none outline-none text-ink placeholder-ink-faint/40 text-[15px] font-serif"
             />
 
             {input.trim() && (
@@ -495,7 +502,7 @@ export default function Home() {
             {/* Send */}
             <button
               onClick={() => { handleSendMessage(); playKeyClick(); }}
-              disabled={!input.trim() || !isConnected}
+              disabled={!input.trim()}
               className="ink-press p-2 bg-ink text-paper rounded disabled:opacity-10 disabled:cursor-not-allowed hover:bg-ink-light transition-colors duration-300"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
