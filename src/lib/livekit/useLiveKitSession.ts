@@ -64,6 +64,8 @@ export function useLiveKitSession() {
           participantName: PARTICIPANT_NAME,
           model: settings?.model || "gemini-3-flash-preview",
           providers: settings?.providers || [],
+          sttProvider: settings?.sttProvider || "whisper",
+          ttsProvider: settings?.ttsProvider || "piper",
         }),
       });
 
@@ -156,6 +158,8 @@ export function useLiveKitSession() {
             if (data.final) {
               addMessage(role, data.text);
             }
+          } else if (data.type === "agent_state" && data.state) {
+            setAgentStatus(data.state);
           }
         } catch {
           // Non-JSON data, ignore
@@ -231,20 +235,6 @@ export function useLiveKitSession() {
     });
   }, []);
 
-  const sendMessage = useCallback(
-    (text: string) => {
-      if (!roomRef.current) return;
-
-      addMessage("user", text);
-
-      const data = new TextEncoder().encode(
-        JSON.stringify({ type: "user_message", text })
-      );
-      roomRef.current.localParticipant.publishData(data, { reliable: true });
-    },
-    [addMessage]
-  );
-
   const toggleMicrophone = useCallback(async () => {
     if (!roomRef.current) return;
     const enabled = roomRef.current.localParticipant.isMicrophoneEnabled;
@@ -271,7 +261,6 @@ export function useLiveKitSession() {
     setMessages,
     connect,
     disconnect,
-    sendMessage,
     toggleMicrophone,
     toggleCamera,
     cameraEnabled,

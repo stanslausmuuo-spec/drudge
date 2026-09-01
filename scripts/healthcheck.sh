@@ -4,8 +4,6 @@ set -e
 echo "=== Jarvis SRE Infrastructure Health Check ==="
 
 SERVICES=(
-  "LiveKit Server:http://localhost:7880"
-  "Ollama LLM:http://localhost:11434/api/tags"
   "Whisper ASR:http://localhost:9000"
   "Piper TTS:http://localhost:5000"
   "Next.js Frontend:http://localhost:3000"

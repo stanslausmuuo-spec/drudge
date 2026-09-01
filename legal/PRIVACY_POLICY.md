@@ -8,7 +8,7 @@ Project Jarvis ("we", "our", or "us") is committed to protecting your privacy. T
 
 ## 2. Privacy-First Architecture & Local Execution
 Unlike traditional cloud-based AI assistants, Project Jarvis is engineered with a **local-first, privacy-first architecture**:
-- **Local AI Inference:** All language model inference (Ollama), speech-to-text transcription (Whisper), and text-to-speech synthesis (Piper) execute locally on your machine or private infrastructure.
+- **Local AI Inference:** Speech-to-text transcription (Whisper) and text-to-speech synthesis (Piper) execute locally on your machine or private infrastructure.
 - **Data Sovereignty:** No voice recordings, transcripts, or video feeds leave your device unless you explicitly opt in to optional cloud-based providers (e.g., OpenAI, Anthropic, Google Gemini, or Deepgram).
 
 ## 3. Data Collection

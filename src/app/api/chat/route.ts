@@ -1,46 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  getJarvisMemory,
+  recordJarvisMemory,
+  buildMemoryContext,
+} from "@/lib/memory";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, model, providers, systemPrompt } = await req.json();
+    const { messages, model, providers, systemPrompt, temperature, maxTokens } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const selectedModel = model || "gemini-3-flash-preview";
-    let apiKey = process.env.GOOGLE_API_KEY;
+    const memory = await getJarvisMemory();
+    const memoryContext = buildMemoryContext(memory);
 
-    // Check if provider API key was passed from frontend settings
-    if (providers && Array.isArray(providers)) {
-      for (const p of providers) {
-        if (selectedModel.startsWith("gpt-") && p.provider === "openai" && p.apiKey) {
-          apiKey = p.apiKey;
-        } else if (selectedModel.startsWith("claude-") && p.provider === "anthropic" && p.apiKey) {
-          apiKey = p.apiKey;
-        } else if (selectedModel.startsWith("gemini-") && p.provider === "google" && p.apiKey) {
-          apiKey = p.apiKey;
-        }
-      }
+    const selectedModel = model || "gemini-3-flash-preview";
+    const temp = typeof temperature === "number" ? temperature : 0.7;
+    const maxTok = typeof maxTokens === "number" ? maxTokens : 4096;
+
+    let apiKey = "";
+
+    // Resolve the API key from frontend settings (localStorage) for the matching provider.
+    if (selectedModel.startsWith("gpt-") && !selectedModel.includes("realtime")) {
+      apiKey = providers?.find((p: any) => p.provider === "openai")?.apiKey || process.env.OPENAI_API_KEY || "";
+    } else if (selectedModel.startsWith("claude-")) {
+      apiKey = providers?.find((p: any) => p.provider === "anthropic")?.apiKey || process.env.ANTHROPIC_API_KEY || "";
+    } else if (selectedModel.startsWith("gemini-")) {
+      apiKey = providers?.find((p: any) => p.provider === "google")?.apiKey || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || "";
     }
 
     const sysPrompt = systemPrompt || "You are Jarvis, an advanced, highly intelligent, privacy-first personal AI assistant.";
+    const fullSystem = memoryContext
+      ? `${sysPrompt}\n\n${memoryContext}`
+      : sysPrompt;
 
     // If OpenAI model
-    if (selectedModel.startsWith("gpt-") || selectedModel.includes("realtime")) {
+    if (selectedModel.startsWith("gpt-") && !selectedModel.includes("realtime")) {
+      if (!apiKey) {
+        return NextResponse.json({ error: "OpenAI API key is missing. Add one in Settings or set OPENAI_API_KEY." }, { status: 400 });
+      }
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey || process.env.OPENAI_API_KEY}`,
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: selectedModel.includes("realtime") ? "gpt-4o-mini" : selectedModel,
+          model: selectedModel,
           messages: [
-            { role: "system", content: sysPrompt },
+            { role: "system", content: fullSystem },
             ...messages,
           ],
-          temperature: 0.7,
+          temperature: temp,
+          max_tokens: maxTok,
         }),
       });
 
@@ -51,23 +65,28 @@ export async function POST(req: NextRequest) {
 
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || "I am here, Boss.";
+      const userMsg = [...messages].reverse().find((m: any) => m.role === "user");
+      if (reply && userMsg) await recordJarvisMemory(memory, String(userMsg.content), reply);
       return NextResponse.json({ reply });
     }
 
     // If Anthropic model
     if (selectedModel.startsWith("claude-")) {
-      const anthropicKey = apiKey || process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) {
+        return NextResponse.json({ error: "Anthropic API key is missing. Add one in Settings or set ANTHROPIC_API_KEY." }, { status: 400 });
+      }
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": anthropicKey || "",
+          "x-api-key": apiKey,
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
           model: selectedModel,
-          system: sysPrompt,
-          max_tokens: 1024,
+          system: fullSystem,
+          max_tokens: Math.min(maxTok, 1024),
+          temperature: temp,
           messages: messages.map((m: any) => ({ role: m.role, content: m.content })),
         }),
       });
@@ -79,27 +98,30 @@ export async function POST(req: NextRequest) {
 
       const data = await response.json();
       const reply = data.content?.[0]?.text || "I am here, Boss.";
+      const userMsg = [...messages].reverse().find((m: any) => m.role === "user");
+      if (reply && userMsg) await recordJarvisMemory(memory, String(userMsg.content), reply);
       return NextResponse.json({ reply });
     }
 
     // If Google Gemini model
     if (selectedModel.startsWith("gemini-")) {
-      const geminiKey = apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!geminiKey) {
+      if (!apiKey) {
         return NextResponse.json({ error: "Google Gemini API key is missing. Restart the server so it picks up GOOGLE_API_KEY from .env.local, or add your own key in Settings." }, { status: 400 });
       }
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${geminiKey}`,
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model: selectedModel,
           messages: [
-            { role: "system", content: sysPrompt },
+            { role: "system", content: fullSystem },
             ...messages,
           ],
+          temperature: temp,
+          max_tokens: maxTok,
         }),
       });
 
@@ -110,10 +132,12 @@ export async function POST(req: NextRequest) {
 
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || "I am here, Boss.";
+      const userMsg = [...messages].reverse().find((m: any) => m.role === "user");
+      if (reply && userMsg) await recordJarvisMemory(memory, String(userMsg.content), reply);
       return NextResponse.json({ reply });
     }
 
-    // Fallback response for local models when running on serverless Vercel without local Ollama
+    // Fallback response when running on serverless Vercel without a configured provider key
     return NextResponse.json({
       reply: "Jarvis is operating in serverless cloud mode. Please configure an OpenAI, Anthropic, or Google Gemini API key in Settings to receive cloud responses."
     });

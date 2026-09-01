@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import logging
 
 logger = logging.getLogger("jarvis-memory")
@@ -17,7 +18,9 @@ class MemoryManager:
             memory_file = os.path.join(base_dir, "long_term.json")
         self.memory_file = memory_file
         self.data = self._load_local()
-        
+        # Ensure the local store file exists on disk so recall/persist actually work
+        self.save_local()
+
         self.mem0_client = None
         if MEM0_AVAILABLE and os.getenv("MEM0_API_KEY"):
             try:
@@ -42,6 +45,9 @@ class MemoryManager:
 
     def save_local(self):
         try:
+            dirname = os.path.dirname(self.memory_file)
+            if dirname:
+                os.makedirs(dirname, exist_ok=True)
             with open(self.memory_file, "w", encoding="utf-8") as f:
                 json.dump(self.data, f, indent=2)
         except Exception as e:
@@ -56,10 +62,16 @@ class MemoryManager:
                     return [r.get("memory") for r in results if "memory" in r]
             except Exception as e:
                 logger.warning("Mem0 get_all error: %s. Falling back to local preferences.", e)
-        
-        # Fallback to local
+
+        # Fallback to local: return preferences AND recent sessions so recall is meaningful
         prefs = self.data.get("preferences", {})
-        return [f"{k}: {v}" for k, v in prefs.items()]
+        lines = [f"{k}: {v}" for k, v in prefs.items()]
+        sessions = self.data.get("sessions", [])
+        for sess in sessions[-3:]:
+            for msg in sess.get("messages", []):
+                if msg and msg.get("role") == "user" and msg.get("content"):
+                    lines.append(msg["content"].strip()[:160])
+        return lines
 
     async def add_memories(self, messages: list, user_id: str = "Boss"):
         """Add conversation turns to Mem0 and local store asynchronously."""
@@ -69,9 +81,23 @@ class MemoryManager:
                 logger.info("Successfully committed conversation turns to Mem0.")
             except Exception as e:
                 logger.warning("Mem0 add error: %s", e)
-        
-        # Also log session locally
+
+        # Persist preferences from assistant/user turns so recall returns real data
+        for msg in messages:
+            content = (msg.get("content") or "").strip()
+            if not content or len(content) > 400:
+                continue
+            if msg.get("role") == "user" and ":" in content:
+                key, _, val = content.partition(":")
+                key = key.strip().lower()
+                val = val.strip()
+                if key and val and len(key) < 40:
+                    self.data.setdefault("preferences", {})[key] = val
+                elif not self.data.get("preferences", {}).get("last_topic"):
+                    self.data.setdefault("preferences", {})["last_topic"] = content
+
+        # Also log session locally with a real timestamp
         sessions = self.data.get("sessions", [])
-        sessions.append({"timestamp": os.getenv("TIMESTAMP"), "messages": messages[-4:]})
-        self.data["sessions"] = sessions[-20:] # Keep last 20
+        sessions.append({"timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"), "messages": messages[-4:]})
+        self.data["sessions"] = sessions[-20:]  # Keep last 20
         self.save_local()

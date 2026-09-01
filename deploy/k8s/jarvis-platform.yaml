@@ -10,7 +10,6 @@ metadata:
   namespace: jarvis-system
 data:
   LIVEKIT_URL: "ws://livekit-server:7880"
-  OLLAMA_BASE_URL: "http://ollama:11434"
   WHISPER_URL: "http://whisper:9000"
   PIPER_URL: "http://piper-tts:5000"
 ---
@@ -59,52 +58,6 @@ spec:
       name: rtc
   selector:
     app: livekit-server
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ollama
-  namespace: jarvis-system
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ollama
-  template:
-    metadata:
-      labels:
-        app: ollama
-    spec:
-      containers:
-        - name: ollama
-          image: ollama/ollama:0.5.7
-          ports:
-            - containerPort: 11434
-          resources:
-            limits:
-              cpu: "4.0"
-              memory: 8Gi
-            requests:
-              cpu: "1.0"
-              memory: 2Gi
-          volumeMounts:
-            - mountPath: /root/.ollama
-              name: ollama-storage
-      volumes:
-        - name: ollama-storage
-          emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ollama
-  namespace: jarvis-system
-spec:
-  ports:
-    - port: 11434
-      targetPort: 11434
-  selector:
-    app: ollama
 ---
 apiVersion: apps/v1
 kind: Deployment

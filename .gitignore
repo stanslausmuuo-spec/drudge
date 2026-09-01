@@ -48,6 +48,9 @@ next-env.d.ts
 jarvis.log
 next.log
 
+# runtime data (chat memory, agent long-term memory)
+/data/
+
 # docker
 *.pid
 

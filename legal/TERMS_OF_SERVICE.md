@@ -8,7 +8,7 @@ By accessing, installing, or operating Project Jarvis ("the Software"), you agre
 
 ## 2. License & Intellectual Property
 - The Software is provided under private source availability and is not licensed for redistribution or commercial resale without explicit written authorization.
-- Third-party dependencies (Next.js, LiveKit, Ollama, Whisper, Piper) remain subject to their respective open-source licenses.
+- Third-party dependencies (Next.js, LiveKit, Whisper, Piper) remain subject to their respective open-source licenses.
 
 ## 3. Disclaimer of Warranties
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY.

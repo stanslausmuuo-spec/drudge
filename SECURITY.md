@@ -22,7 +22,8 @@ Please do **not** create public GitHub issues for security vulnerabilities. Inst
 ## Security Architecture & Best Practices
 
 1. **Air-Gapped / Local Execution**:
-   - All AI inference (Ollama), speech-to-text (Whisper), and text-to-speech (Piper) run locally within containers.
+   - Speech-to-text (Whisper) and text-to-speech (Piper) run locally within containers.
+   - Language-model inference runs via cloud LLM providers (OpenAI / Gemini / Anthropic) using your configured API keys.
    - No sensitive voice or audio data is transmitted to external cloud third parties unless configured explicitly via optional cloud fallbacks (e.g., Deepgram).
 
 2. **Secret Management**:

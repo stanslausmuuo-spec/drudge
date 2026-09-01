@@ -53,6 +53,7 @@ export default function Home() {
     messages,
     setMessages,
     connect,
+    disconnect,
     toggleMicrophone,
     toggleCamera,
     cameraEnabled,
@@ -154,6 +155,8 @@ export default function Home() {
           model: settings.model,
           providers: settings.providers,
           systemPrompt: settings.systemPrompt,
+          temperature: settings.temperature,
+          maxTokens: settings.maxTokens,
         }),
       });
       if (res.ok) {
@@ -389,7 +392,7 @@ export default function Home() {
               )}
             </button>
             <button
-              onClick={() => { toggleCamera(); playKeyClick(); }}
+              onClick={() => { disconnect(); playKeyClick(); }}
               className="w-11 h-11 rounded-full flex items-center justify-center bg-ochre hover:bg-ochre-dim text-ink transition-colors"
               aria-label="End video call"
             >

@@ -3,32 +3,9 @@ version: "1.0.0"
 platform: "Jarvis AI Platform (JAI-OS)"
 
 providers:
-  ollama:
-    base_url: "http://localhost:11434"
-    timeout: 30s
-    default_model: "llama3.1"
-    supported_models:
-      - name: "llama3.1"
-        context_window: 128000
-        quantization: "Q4_K_M"
-        recommended_gpu_vram: "6GB"
-      - name: "gemma2"
-        context_window: 8192
-        quantization: "Q4_K_M"
-        recommended_gpu_vram: "6GB"
-      - name: "mistral"
-        context_window: 32768
-        quantization: "Q4_K_M"
-        recommended_gpu_vram: "6GB"
-      - name: "phi3"
-        context_window: 128000
-        quantization: "Q4_K_M"
-        recommended_gpu_vram: "4GB"
-
   openai:
     api_base: "https://api.openai.com/v1"
     supported_models:
-      - "gpt-4o-realtime-preview"
       - "gpt-4o"
       - "gpt-4o-mini"
 

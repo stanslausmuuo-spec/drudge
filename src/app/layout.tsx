@@ -4,8 +4,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Jarvis — Privacy-First Voice & Vision AI Assistant",
-  description: "An advanced, highly intelligent, privacy-first personal AI assistant and vision companion powered by LiveKit, Ollama, and local speech models.",
-  keywords: ["AI Assistant", "Privacy-First AI", "LiveKit", "Ollama", "Local LLM", "Voice AI", "Vision AI"],
+  description: "An advanced, highly intelligent, privacy-first personal AI assistant and vision companion powered by LiveKit and cloud LLMs.",
+  keywords: ["AI Assistant", "Privacy-First AI", "LiveKit", "Cloud LLM", "Voice AI", "Vision AI"],
   authors: [{ name: "Jarvis AI" }],
   openGraph: {
     title: "Jarvis — Privacy-First Voice & Vision AI Assistant",

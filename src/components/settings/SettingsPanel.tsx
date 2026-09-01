@@ -171,7 +171,6 @@ export default function SettingsPanel({
                   className="w-full bg-transparent border-b border-ink-wash-strong pb-2 text-ink text-sm font-serif outline-none appearance-none cursor-pointer hover:border-ink-light transition-colors"
                 >
                    <optgroup label="OpenAI">
-                     <option value="gpt-4o-realtime-preview">GPT-4o Realtime (Native Voice)</option>
                      <option value="gpt-4o">GPT-4o</option>
                      <option value="gpt-4o-mini">GPT-4o Mini</option>
                    </optgroup>
@@ -378,7 +377,7 @@ export default function SettingsPanel({
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg border border-ink-wash bg-paper">
                   <div>
-                    <p className="font-serif text-sm text-ink">sample_plugin</p>
+                    <p className="font-serif text-sm text-ink">time_plugin</p>
                     <p className="font-mono text-[10px] text-ink-faint">v1.0.0 · Active & Loaded</p>
                   </div>
                   <span className="font-mono text-[10px] uppercase px-2 py-1 rounded bg-ink/10 text-ink">
@@ -394,7 +393,7 @@ export default function SettingsPanel({
               <div className="p-4 rounded-xl border border-ink-wash bg-ink-wash/50 space-y-2">
                 <h4 className="font-serif text-sm font-medium text-ink">Project Jarvis</h4>
                 <p className="text-xs text-ink/70 font-serif leading-relaxed">
-                  A privacy-first, voice-enabled personal AI assistant powered by LiveKit, Ollama, and local or cloud LLMs.
+                  A privacy-first, voice-enabled personal AI assistant powered by LiveKit and cloud LLMs.
                 </p>
               </div>
               <div className="space-y-2.5 pt-2">
