@@ -44,7 +44,7 @@ export function useLiveKitSession() {
         body: JSON.stringify({
           roomName: ROOM_NAME,
           participantName: PARTICIPANT_NAME,
-          model: settings?.model || "gemini-2.0-flash",
+          model: settings?.model || "gemini-3-flash-preview",
           providers: settings?.providers || [],
         }),
       });

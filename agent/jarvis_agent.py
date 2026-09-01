@@ -177,7 +177,7 @@ async def entrypoint(ctx: JobContext):
 
     # Fallback to env or default hardcoded fallback key for default low model
     if not api_key and provider_type == "google":
-        if selected_model == "gemini-2.0-flash":
+        if selected_model.startswith("gemini-3"):
             api_key = os.getenv("GOOGLE_API_KEY", os.getenv("GEMINI_API_KEY"))
 
     # Fallback to env OPENAI_API_KEY if needed

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const selectedModel = model || "gemini-2.0-flash";
+    const selectedModel = model || "gemini-3-flash-preview";
     let apiKey = process.env.GOOGLE_API_KEY;
 
     // Check if provider API key was passed from frontend settings
