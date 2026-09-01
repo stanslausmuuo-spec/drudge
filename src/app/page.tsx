@@ -42,6 +42,7 @@ export default function Home() {
   const [activitySteps, setActivitySteps] = useState<ActivityStep[]>([]);
   const [showActivity, setShowActivity] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [, setHasInteracted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -52,7 +53,6 @@ export default function Home() {
     messages,
     setMessages,
     connect,
-    sendMessage,
     toggleMicrophone,
     toggleCamera,
     cameraEnabled,
@@ -134,19 +134,20 @@ export default function Home() {
     if (!input.trim()) return;
     const textToSend = input;
     setInput("");
-    
-    addMessage("user", textToSend);
 
-    if (connectionState.status === "connected") {
-      sendMessage(textToSend);
-    }
+    addMessage("user", textToSend);
+    setIsThinking(true);
 
     try {
+      // Always use the standard chat API so typed text behaves like a normal
+      // AI assistant, regardless of LiveKit voice connection state.
+      // Send a bounded recent window of context to keep requests fast and focused.
+      const recentMessages = messages.slice(-12);
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: "user", content: textToSend }],
+          messages: [...recentMessages.map(m => ({ role: m.role, content: m.content })), { role: "user", content: textToSend }],
           model: settings.model,
           providers: settings.providers,
           systemPrompt: settings.systemPrompt,
@@ -168,8 +169,10 @@ export default function Home() {
     } catch (err) {
       console.warn("Direct chat API fallback error:", err);
       addMessage("assistant", "Network error communicating with AI provider.");
+    } finally {
+      setIsThinking(false);
     }
-  }, [input, connectionState.status, sendMessage, messages, settings, addMessage, playInkStroke]);
+  }, [input, connectionState.status, messages, settings, addMessage, playInkStroke]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -382,12 +385,23 @@ export default function Home() {
                 </p>
               </div>
 
-              {latestPair.assistant && (
+              {latestPair.assistant ? (
                 <div className="text-left w-full animate-ink-bleed">
                   <KineticText
                     text={latestPair.assistant.content}
                     className="font-serif text-ink"
                   />
+                </div>
+              ) : isThinking && (
+                <div className="text-left w-full animate-ink-bleed">
+                  <div className="flex items-center gap-2 font-serif text-ink/50 italic text-sm">
+                    <span className="inline-flex gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-ink/40 animate-pulse-ink" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-ink/40 animate-pulse-ink" style={{ animationDelay: "0.2s" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-ink/40 animate-pulse-ink" style={{ animationDelay: "0.4s" }} />
+                    </span>
+                    <span>thinking</span>
+                  </div>
                 </div>
               )}
             </>
