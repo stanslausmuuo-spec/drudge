@@ -215,6 +215,16 @@ body {
   50% { opacity: 0.4; }
 }
 
+@keyframes think-dot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-4px); }
+}
+
+@keyframes thinking-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -234,6 +244,8 @@ body {
 .animate-ink-settle { animation: ink-settle 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
 .animate-ink-diffuse { animation: ink-diffuse 30s ease-in-out infinite; }
 .animate-pulse-ink { animation: pulse-ink 2.5s ease-in-out infinite; }
+.animate-think-dot { animation: think-dot 1.1s ease-in-out infinite; }
+.animate-thinking { animation: thinking-pulse 1.4s ease-in-out infinite; }
 .animate-fade-in { animation: fade-in-up 0.5s ease-out forwards; }
 .animate-ink-bleed { animation: ink-bleed-in 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
 .animate-slide-up { animation: slide-up-fade 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }

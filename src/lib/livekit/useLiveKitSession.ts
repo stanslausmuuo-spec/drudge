@@ -16,6 +16,7 @@ export function useLiveKitSession() {
   const [agentStatus, setAgentStatus] = useState<AgentStatus>("disconnected");
   const [messages, setMessages] = useState<Message[]>([]);
   const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [remoteVideo, setRemoteVideo] = useState<HTMLVideoElement | null>(null);
 
   const addMessage = useCallback(
     (role: "user" | "assistant" | "system", content: string) => {
@@ -92,9 +93,37 @@ export function useLiveKitSession() {
                 document.body.appendChild(audioElement);
               }
             }
+          } else if (trackPublication.kind === Track.Kind.Video) {
+            const isRemote =
+              trackPublication.source === Track.Source.Camera ||
+              trackPublication.source === Track.Source.ScreenShare;
+            if (isRemote) {
+              // @ts-ignore
+              const videoTrack = trackPublication.track;
+              if (videoTrack && typeof videoTrack.attach === "function") {
+                const videoElement = videoTrack.attach();
+                videoElement.id = "jarvis-remote-video";
+                videoElement.autoplay = true;
+                videoElement.playsInline = true;
+                videoElement.classList.add("jarvis-remote-video-element");
+                setRemoteVideo(videoElement);
+              }
+            }
           }
         }
       );
+
+      newRoom.on(RoomEvent.TrackUnsubscribed, (trackPublication) => {
+        if (trackPublication.kind === Track.Kind.Video) {
+          setRemoteVideo((prev) => {
+            if (prev) {
+              (prev as any).detach?.();
+              prev.remove();
+            }
+            return null;
+          });
+        }
+      });
 
       newRoom.on(RoomEvent.DataReceived, (payload, participant) => {
         try {
@@ -155,6 +184,13 @@ export function useLiveKitSession() {
     setConnectionState({ status: "disconnected", error: null });
     setAgentStatus("disconnected");
     setCameraEnabled(false);
+    setRemoteVideo((prev) => {
+      if (prev) {
+        (prev as any).detach?.();
+        prev.remove();
+      }
+      return null;
+    });
   }, []);
 
   const sendMessage = useCallback(
@@ -200,6 +236,7 @@ export function useLiveKitSession() {
     toggleMicrophone,
     toggleCamera,
     cameraEnabled,
+    remoteVideo,
     addMessage,
   };
 }

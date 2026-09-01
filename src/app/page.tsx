@@ -56,6 +56,7 @@ export default function Home() {
     toggleMicrophone,
     toggleCamera,
     cameraEnabled,
+    remoteVideo,
     addMessage,
   } = useLiveKitSession();
 
@@ -254,9 +255,12 @@ export default function Home() {
       <div className="topo-lines" aria-hidden="true" />
       <div className="breathing-warmth" aria-hidden="true" />
 
-      {/* Video Call Preview Tile */}
+      {/* REAL-TIME VIDEO CALL */}
       {cameraEnabled && (
-        <div className="absolute top-16 right-8 z-30 w-48 h-36 bg-ink-wash border border-ink-wash-strong rounded-xl overflow-hidden shadow-2xl animate-fade-in flex items-center justify-center">
+        <div className="fixed inset-0 z-40 bg-paper animate-fade-in">
+          <div className="topo-lines absolute inset-0" aria-hidden="true" />
+
+          {/* Main local camera feed */}
           <video
             ref={videoRef}
             autoPlay
@@ -264,9 +268,40 @@ export default function Home() {
             muted
             className="w-full h-full object-cover transform -scale-x-100"
           />
-          <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-ink/60 text-[9px] font-mono text-paper">
-            LIVE VISION
+
+          {/* Remote agent video (PiP) */}
+          {remoteVideo && (
+            <div className="absolute top-16 right-8 z-[45] w-52 h-40 bg-ink-wash border border-ink-wash-strong rounded-xl overflow-hidden shadow-2xl">
+              <div
+                ref={(node) => {
+                  if (node && !node.querySelector("video")) {
+                    node.appendChild(remoteVideo);
+                  }
+                }}
+                className="w-full h-full bg-black"
+              />
+              <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-ink/60 text-[9px] font-mono text-paper uppercase tracking-wider">
+                Jarvis
+              </div>
+            </div>
+          )}
+
+          {/* LIVE indicator */}
+          <div className="absolute top-6 left-8 z-[45] flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-ochre animate-pulse-ink" />
+            <span className="text-[10px] font-mono text-ink/70 uppercase tracking-[0.2em]">
+              Live · {isConnected ? "Connected" : "Connecting"}
+            </span>
           </div>
+
+          {/* Status / speaking indicator */}
+          {!remoteVideo && (
+            <div className="absolute bottom-8 left-0 right-0 z-[45] flex justify-center">
+              <span className="px-4 py-2 rounded-full bg-ink/70 text-paper text-xs font-mono uppercase tracking-wider">
+                {agentStatus === "speaking" ? "Jarvis is speaking" : agentStatus === "listening" ? "Listening..." : "Jarvis is watching"}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -394,11 +429,11 @@ export default function Home() {
                 </div>
               ) : isThinking && (
                 <div className="text-left w-full animate-ink-bleed">
-                  <div className="flex items-center gap-2 font-serif text-ink/50 italic text-sm">
-                    <span className="inline-flex gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-ink/40 animate-pulse-ink" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-ink/40 animate-pulse-ink" style={{ animationDelay: "0.2s" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-ink/40 animate-pulse-ink" style={{ animationDelay: "0.4s" }} />
+                  <div className="flex items-center gap-2.5 font-serif text-ink/50 italic text-sm animate-thinking">
+                    <span className="inline-flex gap-1.5 items-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-ochre animate-think-dot" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-ochre animate-think-dot" style={{ animationDelay: "0.15s" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-ochre animate-think-dot" style={{ animationDelay: "0.3s" }} />
                     </span>
                     <span>thinking</span>
                   </div>
