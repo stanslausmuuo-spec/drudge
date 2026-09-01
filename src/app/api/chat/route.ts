@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const selectedModel = model || "gpt-4o-mini";
-    let apiKey = process.env.OPENAI_API_KEY;
+    const selectedModel = model || "gemini-2.0-flash";
+    let apiKey = process.env.GOOGLE_API_KEY;
 
     // Check if provider API key was passed from frontend settings
     if (providers && Array.isArray(providers)) {
