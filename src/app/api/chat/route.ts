@@ -84,7 +84,10 @@ export async function POST(req: NextRequest) {
 
     // If Google Gemini model
     if (selectedModel.startsWith("gemini-")) {
-      const geminiKey = apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+      const geminiKey = apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || (selectedModel === "gemini-2.0-flash" ? process.env.GOOGLE_API_KEY : undefined);
+      if (!geminiKey) {
+        return NextResponse.json({ error: "Gemini API key is required when changing models or using custom Gemini models." }, { status: 400 });
+      }
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`, {
         method: "POST",
         headers: {

@@ -178,10 +178,15 @@ export function useLiveKitSession() {
   }, []);
 
   const toggleCamera = useCallback(async () => {
-    if (!roomRef.current) return;
-    const enabled = roomRef.current.localParticipant.isCameraEnabled;
-    await roomRef.current.localParticipant.setCameraEnabled(!enabled);
-    setCameraEnabled(!enabled);
+    if (roomRef.current) {
+      try {
+        const enabled = roomRef.current.localParticipant.isCameraEnabled;
+        await roomRef.current.localParticipant.setCameraEnabled(!enabled);
+      } catch (err) {
+        console.warn("LiveKit camera toggle error:", err);
+      }
+    }
+    setCameraEnabled((prev) => !prev);
   }, []);
 
   return {

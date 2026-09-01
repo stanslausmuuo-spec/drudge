@@ -175,6 +175,11 @@ async def entrypoint(ctx: JobContext):
         if p.get("provider") == provider_type or (provider_type == "openai" and p.get("provider") == "openai"):
             api_key = p.get("apiKey")
 
+    # Fallback to env or default hardcoded fallback key for default low model
+    if not api_key and provider_type == "google":
+        if selected_model == "gemini-2.0-flash":
+            api_key = os.getenv("GOOGLE_API_KEY", os.getenv("GEMINI_API_KEY"))
+
     # Fallback to env OPENAI_API_KEY if needed
     if not api_key and os.getenv("OPENAI_API_KEY"):
         api_key = os.getenv("OPENAI_API_KEY")
