@@ -38,7 +38,6 @@ const DEFAULT_SETTINGS: Settings = {
 export default function Home() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [micEnabled, setMicEnabled] = useState(true);
   const [input, setInput] = useState("");
   const [activitySteps, setActivitySteps] = useState<ActivityStep[]>([]);
   const [showActivity, setShowActivity] = useState(false);
@@ -58,6 +57,8 @@ export default function Home() {
     toggleCamera,
     cameraEnabled,
     remoteVideo,
+    micEnabled,
+    audioLevel,
     addMessage,
   } = useLiveKitSession();
 
@@ -192,11 +193,6 @@ export default function Home() {
     setTheme(newSettings.theme);
   }, [setTheme]);
 
-  const handleToggleMic = useCallback(async () => {
-    await toggleMicrophone();
-    setMicEnabled((prev) => !prev);
-  }, [toggleMicrophone]);
-
   const handleClearHistory = useCallback(() => {
     setMessages([]);
     saveStoredMessages([]);
@@ -268,20 +264,37 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Agent status label under hologram */}
-          <div className="absolute bottom-16 left-0 right-0 z-[45] flex justify-center">
-            <span className="px-4 py-2 rounded-full bg-ink/70 text-paper text-xs font-mono uppercase tracking-wider backdrop-blur-sm">
-              {agentStatus === "speaking"
-                ? "Jarvis is speaking"
-                : agentStatus === "listening"
-                ? "Listening..."
-                : agentStatus === "thinking"
-                ? "Processing..."
-                : "Jarvis is watching"}
-            </span>
+          {/* Agent status / voice feedback label under hologram */}
+          <div className="absolute bottom-16 left-0 right-0 z-[45] flex flex-col items-center gap-1.5">
+            <div className="flex items-center gap-2">
+              {agentStatus === "speaking" && (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-ochre animate-pulse-ink" />
+                  <span className="inline-flex gap-1">
+                    {[...Array(4)].map((_, i) => (
+                      <span key={i} className="w-1 rounded-full bg-ochre animate-think-dot" style={{ height: `${8 + i * 3}px`, animationDelay: `${i * 0.12}s` }} />
+                    ))}
+                  </span>
+                </>
+              )}
+              <span className="px-4 py-2 rounded-full bg-ink/70 text-paper text-xs font-mono uppercase tracking-wider backdrop-blur-sm">
+                {agentStatus === "speaking"
+                  ? "Speaking..."
+                  : agentStatus === "listening"
+                  ? (micEnabled ? "I can hear you" : "Mic muted")
+                  : agentStatus === "thinking"
+                  ? "Processing..."
+                  : "Jarvis is watching"}
+              </span>
+            </div>
+            {agentStatus === "listening" && micEnabled && (
+              <span className="text-[9px] font-mono text-ink/50 uppercase tracking-wider">
+                Go ahead, Boss
+              </span>
+            )}
           </div>
 
-          {/* Local camera feed (PiP) */}
+          {/* Local camera feed (PiP) with voice meter */}
           <div className="absolute bottom-8 left-8 z-[45] w-52 h-36 rounded-xl overflow-hidden shadow-2xl border border-ink-wash-strong bg-black">
             <video
               ref={videoRef}
@@ -293,6 +306,38 @@ export default function Home() {
             <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-ink/60 text-[9px] font-mono text-paper uppercase tracking-wider">
               You
             </div>
+            {/* Voice activity meter */}
+            <div className="absolute bottom-2 right-2 flex items-end gap-[3px] h-6">
+              {[...Array(7)].map((_, i) => {
+                const activeLevel = micEnabled
+                  ? Math.max(
+                      audioLevel * 1.5,
+                      agentStatus === "listening" ? 0.4 : 0.06
+                    )
+                  : 0.05;
+                const barActive = activeLevel > (i + 1) / 7 - 0.15;
+                const delay = i * 0.09;
+                return (
+                  <span
+                    key={i}
+                    className="w-[3px] rounded-full bg-ochre transition-all duration-75"
+                    style={{
+                      height: barActive ? `${8 + i * 2.5}px` : "4px",
+                      opacity: micEnabled ? (barActive ? 0.95 : 0.25) : 0.15,
+                      animation: micEnabled ? `think-dot 1.1s ease-in-out ${delay}s infinite` : "none",
+                      transformOrigin: "bottom",
+                    }}
+                  />
+                );
+              })}
+            </div>
+            {!micEnabled && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <span className="text-[9px] font-mono text-paper/70 uppercase tracking-wider">
+                  Muted
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Remote agent video (fallback, if agent publishes real video) */}
@@ -324,7 +369,7 @@ export default function Home() {
           {/* Call controls */}
           <div className="absolute bottom-8 right-8 z-[45] flex items-center gap-2">
             <button
-              onClick={() => { handleToggleMic(); playKeyClick(); }}
+              onClick={() => { toggleMicrophone(); playKeyClick(); }}
               className="w-11 h-11 rounded-full flex items-center justify-center bg-ink/60 hover:bg-ink/80 text-paper transition-colors"
               aria-label="Toggle microphone"
             >
@@ -546,7 +591,7 @@ export default function Home() {
           <div className="ink-spread relative flex items-center gap-3 px-5 py-3 border border-ink-wash rounded bg-paper/50 backdrop-blur-sm">
             {/* Mic */}
             <button
-              onClick={() => { handleToggleMic(); playKeyClick(); }}
+              onClick={() => { toggleMicrophone(); playKeyClick(); }}
               disabled={!isConnected}
               className={`ink-press p-2 rounded transition-all duration-300 ${
                 !isConnected

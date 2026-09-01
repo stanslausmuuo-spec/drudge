@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { Room, RoomEvent, Track } from "livekit-client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Room, RoomEvent, Track, createAudioAnalyser } from "livekit-client";
 import { AgentStatus, ConnectionState as ConnState, Message, Settings } from "@/types";
 
 const ROOM_NAME = "jarvis-room";
@@ -17,6 +17,10 @@ export function useLiveKitSession() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [remoteVideo, setRemoteVideo] = useState<HTMLVideoElement | null>(null);
+  const [micEnabled, setMicEnabled] = useState(true);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const audioCleanupRef = useRef<(() => Promise<void>) | null>(null);
+  const calculateVolumeRef = useRef<(() => number) | null>(null);
 
   const addMessage = useCallback(
     (role: "user" | "assistant" | "system", content: string) => {
@@ -31,6 +35,19 @@ export function useLiveKitSession() {
     },
     []
   );
+
+  // Poll the local mic analyser to drive a live voice-activity meter.
+  useEffect(() => {
+    const id = setInterval(() => {
+      const calc = calculateVolumeRef.current;
+      let level = 0;
+      if (calc) {
+        level = calc();
+      }
+      setAudioLevel((prev) => (prev === level ? prev : level));
+    }, 80);
+    return () => clearInterval(id);
+  }, []);
 
   const connect = useCallback(async (settings?: Settings) => {
     if (roomRef.current) return;
@@ -166,6 +183,22 @@ export function useLiveKitSession() {
       await newRoom.connect(url, token);
       await newRoom.localParticipant.setMicrophoneEnabled(true);
 
+      // Set up voice-activity metering from the local microphone.
+      try {
+        const localAudioPub = newRoom.localParticipant.getTrackPublication(Track.Source.Microphone);
+        const localAudioTrack = localAudioPub?.track as any;
+        if (localAudioTrack && typeof localAudioTrack?.attach === "function") {
+          const analyser = createAudioAnalyser(
+            localAudioTrack,
+            { fftSize: 128, smoothingTimeConstant: 0.2, cloneTrack: false }
+          );
+          calculateVolumeRef.current = analyser.calculateVolume;
+          audioCleanupRef.current = analyser.cleanup;
+        }
+      } catch (err) {
+        console.warn("Audio analyser setup error:", err);
+      }
+
       roomRef.current = newRoom;
     } catch (error) {
       const message =
@@ -177,6 +210,10 @@ export function useLiveKitSession() {
   }, [addMessage]);
 
   const disconnect = useCallback(() => {
+    audioCleanupRef.current?.();
+    audioCleanupRef.current = null;
+    calculateVolumeRef.current = null;
+    setAudioLevel(0);
     if (roomRef.current) {
       roomRef.current.disconnect();
       roomRef.current = null;
@@ -184,6 +221,7 @@ export function useLiveKitSession() {
     setConnectionState({ status: "disconnected", error: null });
     setAgentStatus("disconnected");
     setCameraEnabled(false);
+    setMicEnabled(true);
     setRemoteVideo((prev) => {
       if (prev) {
         (prev as any).detach?.();
@@ -211,6 +249,7 @@ export function useLiveKitSession() {
     if (!roomRef.current) return;
     const enabled = roomRef.current.localParticipant.isMicrophoneEnabled;
     await roomRef.current.localParticipant.setMicrophoneEnabled(!enabled);
+    setMicEnabled(!enabled);
   }, []);
 
   const toggleCamera = useCallback(async () => {
@@ -237,6 +276,8 @@ export function useLiveKitSession() {
     toggleCamera,
     cameraEnabled,
     remoteVideo,
+    micEnabled,
+    audioLevel,
     addMessage,
   };
 }
